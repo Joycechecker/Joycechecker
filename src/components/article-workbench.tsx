@@ -197,6 +197,25 @@ function textToPoints(text: string) {
     .filter(Boolean);
 }
 
+async function readApiPayload<T>(response: Response) {
+  const rawText = await response.text();
+
+  if (!rawText) {
+    return {} as T & { error?: string };
+  }
+
+  try {
+    return JSON.parse(rawText) as T & { error?: string };
+  } catch {
+    return {
+      error:
+        rawText.startsWith("Error")
+          ? `线上接口暂时异常：${rawText}`
+          : "线上接口返回了非标准响应，请稍后重试。",
+    } as T & { error?: string };
+  }
+}
+
 function readFileAsDataUrl(file: File) {
   return new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
@@ -1014,7 +1033,7 @@ export function ArticleWorkbench({ viewer }: ArticleWorkbenchProps) {
         }),
       });
 
-      const payload = (await response.json()) as GenerateResponse & { error?: string };
+      const payload = await readApiPayload<GenerateResponse>(response);
 
       if (!response.ok) {
         throw new Error(payload.error || "生成失败");
@@ -1066,9 +1085,7 @@ export function ArticleWorkbench({ viewer }: ArticleWorkbenchProps) {
         body: JSON.stringify(brief),
       });
 
-      const payload = (await response.json()) as TopicStrategyResponse & {
-        error?: string;
-      };
+      const payload = await readApiPayload<TopicStrategyResponse>(response);
 
       if (!response.ok) {
         throw new Error(payload.error || "生成选题建议失败");
@@ -1110,7 +1127,7 @@ export function ArticleWorkbench({ viewer }: ArticleWorkbenchProps) {
         body: JSON.stringify(body),
       });
 
-      const payload = (await response.json()) as GenerateResponse & { error?: string };
+      const payload = await readApiPayload<GenerateResponse>(response);
 
       if (!response.ok) {
         throw new Error(payload.error || "优化失败");
@@ -1166,12 +1183,12 @@ export function ArticleWorkbench({ viewer }: ArticleWorkbenchProps) {
         }),
       });
 
-      const payload = (await response.json()) as {
+      const payload = await readApiPayload<{
         imageUrl?: string;
         error?: string;
         source?: string;
         notice?: string;
-      };
+      }>(response);
 
       if (!response.ok || !payload.imageUrl) {
         throw new Error(payload.error || "生成图片失败");
@@ -1226,12 +1243,12 @@ export function ArticleWorkbench({ viewer }: ArticleWorkbenchProps) {
         }),
       });
 
-      const payload = (await response.json()) as {
+      const payload = await readApiPayload<{
         imageUrl?: string;
         error?: string;
         source?: string;
         notice?: string;
-      };
+      }>(response);
 
       if (!response.ok || !payload.imageUrl) {
         throw new Error(payload.error || "生成封面图失败");
