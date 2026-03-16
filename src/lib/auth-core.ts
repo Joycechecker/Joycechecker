@@ -83,7 +83,7 @@ function readConfiguredUsers() {
         .filter((item) => item.email && item.password)
         .map((item) => ({
           email: normalizeEmail(item.email || ""),
-          password: item.password || "",
+          password: (item.password || "").trim(),
           name: item.name?.trim() || (item.email || "").split("@")[0] || "Studio User",
         })) satisfies ConfiguredUser[];
     } catch {
@@ -95,7 +95,7 @@ function readConfiguredUsers() {
     return [
       {
         email: normalizeEmail(process.env.AUTH_LOGIN_EMAIL),
-        password: process.env.AUTH_LOGIN_PASSWORD,
+        password: process.env.AUTH_LOGIN_PASSWORD.trim(),
         name: process.env.AUTH_LOGIN_NAME?.trim() || "Studio Owner",
       },
     ] satisfies ConfiguredUser[];
@@ -174,10 +174,11 @@ export async function readSessionFromToken(token: string | undefined | null) {
 
 export async function authenticateUser(email: string, password: string) {
   const normalizedEmail = normalizeEmail(email);
+  const normalizedPassword = password.trim();
   const users = readConfiguredUsers();
   const matchedUser = users.find((user) => user.email === normalizedEmail);
 
-  if (!matchedUser || matchedUser.password !== password) {
+  if (!matchedUser || matchedUser.password !== normalizedPassword) {
     return null;
   }
 
