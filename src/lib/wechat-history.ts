@@ -7,6 +7,7 @@ const REQUEST_HEADERS = {
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36",
   "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8",
 };
+const FETCH_TIMEOUT_MS = Number(process.env.WECHAT_FETCH_TIMEOUT_MS?.trim() || "3500");
 
 function decodeHtmlEntities(value: string) {
   return value
@@ -111,11 +112,15 @@ export function parseManualHistoryTitles(raw: string): HistoryReference[] {
 export async function fetchWechatHistoryReferences(urls: string[]) {
   const results = await Promise.all(
     urls.map(async (url) => {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+
       try {
         const response = await fetch(url, {
           headers: REQUEST_HEADERS,
           redirect: "follow",
           cache: "no-store",
+          signal: controller.signal,
         });
 
         if (!response.ok) {
@@ -136,6 +141,8 @@ export async function fetchWechatHistoryReferences(urls: string[]) {
           source: "fetched" as const,
           error: error instanceof Error ? error.message : "未知抓取错误",
         };
+      } finally {
+        clearTimeout(timeout);
       }
     }),
   );

@@ -75,6 +75,16 @@ type GenerateImageOptions = {
   referenceImageName?: string;
 };
 
+const HISTORY_REFERENCE_TIMEOUT_MS = Number(
+  process.env.HISTORY_REFERENCE_TIMEOUT_MS?.trim() || "4500",
+);
+const TEXT_REQUEST_TIMEOUT_MS = Number(
+  process.env.AI_TEXT_REQUEST_TIMEOUT_MS?.trim() || "18000",
+);
+const IMAGE_REQUEST_TIMEOUT_MS = Number(
+  process.env.AI_IMAGE_REQUEST_TIMEOUT_MS?.trim() || "25000",
+);
+
 function getProviderLabel(providerId: string) {
   if (process.env.AI_PROVIDER_NAME?.trim()) {
     return process.env.AI_PROVIDER_NAME.trim();
@@ -162,7 +172,18 @@ function getRuntimeConfig(): RuntimeConfig {
   };
 }
 
-function getClient(config: RuntimeConfig) {
+function withTimeout<T>(promise: Promise<T>, timeoutMs: number, fallback: () => T | Promise<T>) {
+  return Promise.race([
+    promise,
+    new Promise<T>((resolve) => {
+      setTimeout(async () => {
+        resolve(await fallback());
+      }, timeoutMs);
+    }),
+  ]);
+}
+
+function getClient(config: RuntimeConfig, timeoutMs = TEXT_REQUEST_TIMEOUT_MS) {
   if (!config.apiKey) {
     return null;
   }
@@ -170,6 +191,7 @@ function getClient(config: RuntimeConfig) {
   return new OpenAI({
     apiKey: config.apiKey,
     baseURL: config.baseURL,
+    timeout: timeoutMs,
   });
 }
 
@@ -496,13 +518,16 @@ async function resolveHistoryReferences(brief: BriefInput): Promise<{
 }> {
   const manualReferences = parseManualHistoryTitles(brief.historyArticleTitles);
   const urls = parseHistoryUrls(brief.historyArticleUrls);
-  const searchReferences =
-    brief.accountMode === "existing" && brief.accountName.trim()
-      ? await searchWechatHistoryReferences(brief.accountName, brief.accountDirection)
-      : [];
-
-  const fetchedReferences =
-    urls.length > 0 ? await fetchWechatHistoryReferences(urls) : [];
+  const [searchReferences, fetchedReferences] = await withTimeout(
+    Promise.all([
+      brief.accountMode === "existing" && brief.accountName.trim()
+        ? searchWechatHistoryReferences(brief.accountName, brief.accountDirection)
+        : Promise.resolve([]),
+      urls.length > 0 ? fetchWechatHistoryReferences(urls) : Promise.resolve([]),
+    ]),
+    HISTORY_REFERENCE_TIMEOUT_MS,
+    async () => [[], []] as [HistoryReference[], HistoryReference[]],
+  );
   const validSearch = searchReferences.filter((item) => !item.error && item.title.trim());
   const validFetched = fetchedReferences.filter((item) => !item.error && item.title.trim());
 
@@ -830,12 +855,24 @@ export async function generateTopicStrategy(brief: BriefInput) {
     };
   }
 
-  const result = await requestStructuredTopicStrategy(
-    client,
-    config,
-    brief,
-    history.promptReferences,
+  const result = await withTimeout(
+    requestStructuredTopicStrategy(client, config, brief, history.promptReferences),
+    TEXT_REQUEST_TIMEOUT_MS,
+    async () => ({
+      strategy: normalizeTopicStrategy({}, brief),
+      model: "mock-timeout",
+    }),
   );
+
+  if (result.model === "mock-timeout") {
+    return {
+      strategy: result.strategy,
+      historyReferences: history.allReferences,
+      source: "mock" as const,
+      provider: "Mock",
+      model: "本地演示",
+    };
+  }
 
   return {
     strategy: result.strategy,
@@ -916,6 +953,7 @@ export async function generateImage(
       ? new OpenAI({
           apiKey: imageApiKey,
           baseURL: imageBaseURL,
+          timeout: IMAGE_REQUEST_TIMEOUT_MS,
         })
       : client;
   const providerLabel = imageProvider ? getProviderLabel(imageProvider) : config.providerLabel;
