@@ -1,0 +1,30 @@
+{
+  "name": "wechat-ai-studio",
+  "version": "0.1.0",
+  "private": true,
+  "engines": {
+    "node": ">=20.9.0 <23"
+  },
+  "scripts": {
+    "dev": "next dev --webpack",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "jsonrepair": "^3.13.2",
+    "next": "16.1.6",
+    "openai": "^6.6.0",
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
+    "tencentcloud-sdk-nodejs-wsa": "^4.1.173"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.14",
+    "@types/react": "^19.0.10",
+    "@types/react-dom": "^19.0.4",
+    "eslint": "9.22.0",
+    "eslint-config-next": "16.1.6",
+    "typescript": "^5.8.2"
+  }
+}

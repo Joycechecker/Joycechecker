@@ -1,0 +1,11 @@
+.next
+node_modules
+.DS_Store
+._*
+.edgeone
+.vercel
+*.log
+src.zip
+*战略会议报告-*.html
+.env*
+!.env.example

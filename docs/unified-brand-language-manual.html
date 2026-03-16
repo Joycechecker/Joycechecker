@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Awarua 统一品牌语言手册</title>
+    <style>
+      :root {
+        --ink: #1f2937;
+        --muted: #5b6575;
+        --line: #d7deea;
+        --brand: #0a7860;
+        --brand-soft: #e8f5f0;
+        --paper: #ffffff;
+        --bg: #f5f7fb;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+        color: var(--ink);
+        background: var(--bg);
+        line-height: 1.7;
+      }
+
+      .page {
+        width: 960px;
+        margin: 32px auto;
+        background: var(--paper);
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        box-shadow: 0 12px 36px rgba(15, 23, 42, 0.08);
+        overflow: hidden;
+      }
+
+      .hero {
+        padding: 48px 56px 36px;
+        background: linear-gradient(135deg, #0a7860 0%, #0f8f72 100%);
+        color: #fff;
+      }
+
+      .hero h1 {
+        margin: 0 0 12px;
+        font-size: 40px;
+        line-height: 1.2;
+      }
+
+      .hero p {
+        margin: 0;
+        font-size: 16px;
+        color: rgba(255, 255, 255, 0.9);
+      }
+
+      .meta {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+        padding: 24px 56px;
+        background: #f0f7f4;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .meta-card {
+        padding: 14px 16px;
+        border-radius: 14px;
+        background: #fff;
+        border: 1px solid #d6ebe4;
+      }
+
+      .meta-card strong {
+        display: block;
+        font-size: 13px;
+        color: var(--muted);
+      }
+
+      .meta-card span {
+        display: block;
+        margin-top: 6px;
+        font-size: 16px;
+        font-weight: 700;
+      }
+
+      .section {
+        padding: 28px 56px;
+        border-bottom: 1px solid #edf1f6;
+      }
+
+      .section:last-child {
+        border-bottom: 0;
+      }
+
+      h2 {
+        margin: 0 0 16px;
+        font-size: 24px;
+        color: var(--brand);
+      }
+
+      h3 {
+        margin: 18px 0 10px;
+        font-size: 18px;
+        color: var(--ink);
+      }
+
+      p {
+        margin: 0 0 12px;
+      }
+
+      ul {
+        margin: 8px 0 0 20px;
+        padding: 0;
+      }
+
+      li {
+        margin: 8px 0;
+      }
+
+      .highlight {
+        padding: 18px 20px;
+        background: var(--brand-soft);
+        border-left: 5px solid var(--brand);
+        border-radius: 12px;
+      }
+
+      .grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+      }
+
+      .card {
+        padding: 18px 20px;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: #fff;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 14px;
+        font-size: 14px;
+      }
+
+      th,
+      td {
+        border: 1px solid var(--line);
+        padding: 12px 14px;
+        vertical-align: top;
+      }
+
+      th {
+        text-align: left;
+        background: #f4f8fb;
+        color: var(--ink);
+      }
+
+      .badge {
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 999px;
+        background: #eef7f3;
+        color: var(--brand);
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .danger {
+        color: #b42318;
+        font-weight: 700;
+      }
+
+      .footer {
+        padding: 20px 56px 36px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <section class="hero">
+        <h1>Awarua《统一品牌语言手册》</h1>
+        <p>对外表达版 v4 · 含内部市场机会附录，用于品牌、渠道、电商、直播、客服与内容团队统一口径</p>
+      </section>
+
+      <section class="meta">
+        <div class="meta-card">
+          <strong>适用场景</strong>
+          <span>详情页 / 直播 / 短视频 / 客服 / 渠道介绍</span>
+        </div>
+        <div class="meta-card">
+          <strong>统一定位</strong>
+          <span>新西兰 A2 精准营养奶粉品牌</span>
+        </div>
+        <div class="meta-card">
+          <strong>使用原则</strong>
+          <span>对外可见、简单一致、长期可复用</span>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>1. 手册定位</h2>
+        <div class="highlight">
+          这份手册统一的是 Awarua 对外怎么说，而不是内部怎么讨论。所有内容必须满足三个标准：消费者看得懂、渠道能复述、终端团队能直接拿来用。
+        </div>
+        <ul>
+          <li>优先讲清楚 Awarua 是什么，而不是品牌内部为什么调整。</li>
+          <li>优先讲消费者能感受到的价值，而不是技术讨论本身。</li>
+          <li>优先讲长期可坚持的营养意义，而不是短期刺激成交的夸张表达。</li>
+        </ul>
+      </section>
+
+      <section class="section">
+        <h2>补充：市场机会与项目前景（内部理解）</h2>
+        <div class="highlight">
+          这部分用于帮助团队建立项目信心和增长预期，可用于内部培训和团队共识，不建议作为对外逐字引用素材。
+        </div>
+        <h3>公开数据锚点</h3>
+        <div class="grid-2">
+          <div class="card">
+            <h3>304.6 亿元</h3>
+            <p>中国成人奶粉市场，2025E</p>
+            <p>来源：天猫淘宝行业白皮书摘要</p>
+          </div>
+          <div class="card">
+            <h3>126.82 亿元</h3>
+            <p>中老年成人奶粉市场，2024E</p>
+            <p>来源：观研天下摘要</p>
+          </div>
+          <div class="card">
+            <h3>23.0%</h3>
+            <p>2025 年底 60 岁以上人口占比</p>
+            <p>来源：国家统计局</p>
+          </div>
+          <div class="card">
+            <h3>49%</h3>
+            <p>35–50 岁女性是核心决策人群</p>
+            <p>来源：天猫淘宝成人奶粉消费者画像摘要</p>
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <h3>三条市场判断</h3>
+            <ul>
+              <li>成人奶粉是一个真实存在、并持续扩大的市场。</li>
+              <li>消费者正在从宽泛品类词，转向“功能关键词”做决策。</li>
+              <li>35–50 岁女性会跨家庭成员推动健康与营养选择。</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>A2 机会带宽建议表达</h3>
+            <p>成人 A2 奶粉在中国暂无统一公开市场规模口径，内部培训建议使用<span class="badge">机会带宽</span>，而不是“确定市场规模”。</p>
+            <p><strong>建议内部表达：</strong>成人 A2 奶粉机会带宽约 15–25 亿元。</p>
+            <ul>
+              <li>基于进口 / 中高端 / A2 / 功能营养特征定义的可服务线上子市场估算。</li>
+              <li>相比直接使用缺少统一来源的大数字，这样的说法更稳妥、更便于团队统一理解。</li>
+            </ul>
+          </div>
+        </div>
+        <p>
+          对团队来说，这意味着我们做的不是一个没有想象力的“存量小项目”，而是在进入一个仍有真实规模、还能继续增长、也能通过内容与渠道能力放大的赛道。Awarua 的机会，不只是卖出一款奶粉，而是从“有机稀缺故事”转向“家庭 A2 精准营养故事”，建立长期复购、内容资产和产品延展能力。
+        </p>
+      </section>
+
+      <section class="section">
+        <h2>2. 一句话定位</h2>
+        <p><span class="badge">品牌标语</span> More Than Just a Glass of Milk · 不止是一杯好奶</p>
+        <div class="grid-2">
+          <div class="card">
+            <h3>标准品牌定位</h3>
+            <p>Awarua 是<span class="badge">新西兰 A2 精准营养奶粉品牌</span>。</p>
+          </div>
+          <div class="card">
+            <h3>消费者版表达</h3>
+            <p>Awarua 来自新西兰，以 A2 奶粉为基础，为不同阶段提供更有针对性的营养选择。</p>
+          </div>
+          <div class="card">
+            <h3>渠道版表达</h3>
+            <p>Awarua 适合围绕不同人群和营养需求，做更清晰的 A2 精准营养产品布局与内容转化。</p>
+          </div>
+          <div class="card">
+            <h3>推荐短句</h3>
+            <p>新西兰来源、A2 奶源基础、精准营养设计、适合全家长期喝。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>3. 品牌核心表达</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>表达维度</th>
+              <th>统一说法</th>
+              <th>说明</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>来源</td>
+              <td>来自新西兰</td>
+              <td>建立品质感与信任感，是品牌起点，不必展开复杂背景。</td>
+            </tr>
+            <tr>
+              <td>基础</td>
+              <td>以 A2 奶粉为基础</td>
+              <td>强调产品底层逻辑，统一到“更适合长期营养选择”的方向。</td>
+            </tr>
+            <tr>
+              <td>价值</td>
+              <td>精准营养设计</td>
+              <td>不是泛泛“很营养”，而是围绕不同人群与阶段表达更有针对性。</td>
+            </tr>
+            <tr>
+              <td>长期意义</td>
+              <td>适合全家长期喝</td>
+              <td>所有内容最终都要落回“可坚持、可复购、可融入生活”。</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="section">
+        <h2>4. 目标人群与购买关系链</h2>
+        <p>外部表达不必强调复杂画像，但内部在组织内容时要清楚：核心购买者通常是家庭营养管理者，她们可能为自己、父母、孩子、伴侣做长期营养选择。</p>
+        <ul>
+          <li>对外不要空泛讲“全家都适合”，要讲清楚给谁喝、什么时候喝、为什么适合。</li>
+          <li>推荐聚焦四类：父母营养、自我养护、轻运动 / 控糖意识人群、儿童成长阶段。</li>
+          <li>统一表达公式：谁喝 + 什么时间喝 + 为什么适合 + 长期喝的意义。</li>
+        </ul>
+      </section>
+
+      <section class="section">
+        <h2>5. 五大统一场景</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>场景</th>
+              <th>统一说法</th>
+              <th>一句话示例</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>早餐第一杯</td>
+              <td>早上来不及认真搭配时，先补一杯更稳妥的日常营养</td>
+              <td>“早上忙，也先把这一杯营养喝进去。”</td>
+            </tr>
+            <tr>
+              <td>给父母长期补养</td>
+              <td>适合围绕中老年日常营养管理做长期坚持</td>
+              <td>“给父母选的不是偶尔补一次，而是每天都能坚持的营养底盘。”</td>
+            </tr>
+            <tr>
+              <td>自我养护</td>
+              <td>适合早餐、下午茶、加班间隙的日常营养补充</td>
+              <td>“不是临时想到才喝，而是把营养补充变成日常习惯。”</td>
+            </tr>
+            <tr>
+              <td>轻运动 / 控糖意识</td>
+              <td>适合运动后、加餐时、饱腹管理期的轻负担营养补充</td>
+              <td>“比随手吃点零食更稳，也更容易长期坚持。”</td>
+            </tr>
+            <tr>
+              <td>孩子成长 / 学习期</td>
+              <td>适合早餐、学习期、作息紧张时的基础营养补充</td>
+              <td>“上学赶时间，也想给孩子留下一杯更踏实的营养补充。”</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="section">
+        <h2>6. 产品线表达</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>维度</th>
+              <th>基础线</th>
+              <th>增强线</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>角色</td>
+              <td>进入市场、建立信任、形成稳定复购</td>
+              <td>提供更明确的人群型升级理由</td>
+            </tr>
+            <tr>
+              <td>统一关键词</td>
+              <td>日常、安心、可坚持、易复购</td>
+              <td>更有针对性、升级有理由、适合更明确的人群需求</td>
+            </tr>
+            <tr>
+              <td>讲法重点</td>
+              <td>“好进入、好坚持”</td>
+              <td>“为什么值得升级”</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="section">
+        <h2>7. 推荐说法与避免表达</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>类别</th>
+              <th>✅ 推荐说法</th>
+              <th>❌ 避免表达</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>品牌定位</td>
+              <td>新西兰 A2 精准营养奶粉品牌</td>
+              <td>只靠“进口”“高端”“稀缺”做空泛包装</td>
+            </tr>
+            <tr>
+              <td>沟通重点</td>
+              <td>谁喝 / 什么时候喝 / 为什么适合长期喝</td>
+              <td>只讲成分名词，不讲使用场景</td>
+            </tr>
+            <tr>
+              <td>价值表达</td>
+              <td>适合长期营养管理、适合日常坚持、适合全家场景</td>
+              <td>“万能营养”“谁都必须喝”“一喝就明显见效”</td>
+            </tr>
+            <tr>
+              <td>功效边界</td>
+              <td>更友好的日常饮用体验、适合长期营养补充</td>
+              <td class="danger">治疗、治愈、药效、零风险、绝对最好、立刻见效</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="section">
+        <h2>8. 终端统一话术模板</h2>
+        <div class="grid-2">
+          <div class="card">
+            <h3>直播开场</h3>
+            <p>“Awarua 来自新西兰，以 A2 奶粉为基础，不只是日常喝奶，更是围绕不同阶段做长期营养补充的一种选择。你是给自己喝、给父母喝，还是给孩子喝，我们都能找到更合适的场景。”</p>
+          </div>
+          <div class="card">
+            <h3>详情页标题</h3>
+            <p>新西兰 A2 精准营养奶粉｜适合全家长期喝的日常营养选择</p>
+          </div>
+          <div class="card">
+            <h3>短视频口播</h3>
+            <p>“很多人不是完全没有营养，而是缺少一杯每天都更容易坚持的营养补充。Awarua 想做的，就是把这种选择变得更简单。”</p>
+          </div>
+          <div class="card">
+            <h3>客服首答</h3>
+            <p>“Awarua 的核心特点是新西兰来源、A2 奶粉基础，以及围绕不同阶段做更有针对性的营养设计。你告诉我是谁喝、什么时候喝，我可以更准确帮你推荐。”</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>9. FAQ 标准答法</h2>
+        <h3>Q1：Awarua 和普通奶粉有什么不同？</h3>
+        <p>统一答法：Awarua 不只是做基础补充，而是以 A2 奶粉为基础，围绕不同人群和生活场景提供更有针对性的营养选择，更适合长期坚持。</p>
+
+        <h3>Q2：为什么很多家庭会关注 A2 奶粉？</h3>
+        <p>统一答法：很多消费者在选择奶粉时，会更关注日常饮用体验、长期坚持感和是否适合全家不同阶段。Awarua 也是基于这样的需求，去组织 A2 基础与精准营养表达。</p>
+
+        <h3>Q3：产品中的大豆卵磷脂是什么作用？</h3>
+        <p>统一答法：大豆卵磷脂是食品中常见的配料，主要作用是帮助奶粉更均匀冲调、让饮用体验更稳定顺口。Awarua 更关注的是整体配方设计与日常饮用体验。</p>
+
+        <h3>Q4：喝精准营养奶粉，和补充剂有什么不同？</h3>
+        <p>统一答法：精准营养奶粉更适合作为日常营养打底，帮助把蛋白质、能量和多种营养补充融入生活；补充剂则更适合有明确单一补充需求的人群。</p>
+      </section>
+
+      <section class="section">
+        <h2>10. 对外执行红线</h2>
+        <ul>
+          <li>不主动讲品牌内部调整过程，不把内部判断拿到消费者面前解释。</li>
+          <li>不主动放大配料争议，不使用“风险”“安全区间”这类容易引发误解的词。</li>
+          <li>不做医学承诺，不用药品式表达，不做绝对化比较。</li>
+          <li>所有终端内容都优先回到“谁喝 / 什么时候喝 / 为什么适合长期喝”。</li>
+          <li>所有外部内容都应先建立信任，再讲产品差异，最后落回长期复购与场景适配。</li>
+        </ul>
+      </section>
+
+      <section class="footer">
+        对外表达版文件，可供品牌、内容、电商、直播、客服与渠道团队统一参考。<br />
+        建议后续继续配套输出：《直播与详情页话术模板》《达人 Brief 模板》《客服问答清单》。
+      </section>
+    </main>
+  </body>
+</html>

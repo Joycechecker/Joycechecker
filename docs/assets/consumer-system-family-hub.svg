@@ -1,0 +1,94 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+  <title id="title">消费者系统｜购买者是家庭决策中心</title>
+  <desc id="desc">以核心购买者为中心，展示银发长辈、儿童成长、自我养护、轻运动或控糖四类消费场景的家庭决策图。</desc>
+  <defs>
+    <linearGradient id="titleBar" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#6c4192"/>
+      <stop offset="100%" stop-color="#7e55a7"/>
+    </linearGradient>
+    <linearGradient id="hubFill" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f0e8f8"/>
+      <stop offset="100%" stop-color="#e6dbf2"/>
+    </linearGradient>
+    <pattern id="softDots" width="24" height="24" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1.1" fill="#e6e0ef"/>
+    </pattern>
+    <filter id="cardShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="10" stdDeviation="16" flood-color="#2d1841" flood-opacity="0.08"/>
+    </filter>
+    <style>
+      .title {
+        font-family: "Avenir Next", "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+        font-weight: 700;
+      }
+      .zh {
+        font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      }
+      .card-title {
+        font-size: 28px;
+        font-weight: 700;
+        fill: #6c4192;
+      }
+      .card-copy {
+        font-size: 18px;
+        font-weight: 500;
+        fill: #5e6073;
+      }
+    </style>
+  </defs>
+
+  <rect width="1600" height="900" fill="#f7f5fa"/>
+  <rect width="1600" height="900" fill="url(#softDots)" opacity="0.65"/>
+
+  <g filter="url(#cardShadow)">
+    <rect x="72" y="38" width="1456" height="108" rx="28" fill="url(#titleBar)"/>
+  </g>
+  <text x="800" y="106" text-anchor="middle" class="zh" font-size="46" font-weight="700" fill="#ffffff">消费者系统｜购买者是家庭决策中心</text>
+
+  <circle cx="800" cy="500" r="184" fill="none" stroke="#d5c7e6" stroke-width="2" stroke-dasharray="8 12" opacity="0.9"/>
+
+  <path d="M 618 382 C 560 352, 520 334, 468 306" fill="none" stroke="#b69bcf" stroke-width="5" stroke-linecap="round"/>
+  <path d="M 982 382 C 1040 352, 1080 334, 1132 306" fill="none" stroke="#b69bcf" stroke-width="5" stroke-linecap="round"/>
+  <path d="M 618 618 C 560 648, 520 666, 468 694" fill="none" stroke="#b69bcf" stroke-width="5" stroke-linecap="round"/>
+  <path d="M 982 618 C 1040 648, 1080 666, 1132 694" fill="none" stroke="#b69bcf" stroke-width="5" stroke-linecap="round"/>
+
+  <g filter="url(#cardShadow)">
+    <rect x="186" y="206" width="354" height="172" rx="28" fill="#fbf9fe" stroke="#d8cde7" stroke-width="2"/>
+    <rect x="214" y="234" width="88" height="12" rx="6" fill="#e8ddf4"/>
+    <text x="214" y="286" class="zh card-title">银发一族</text>
+    <text x="214" y="330" class="zh card-copy">给自己或给长辈</text>
+    <text x="214" y="362" class="zh card-copy">健康 / 关怀 / 长期营养</text>
+  </g>
+
+  <g filter="url(#cardShadow)">
+    <rect x="1060" y="206" width="354" height="172" rx="28" fill="#fbf9fe" stroke="#d8cde7" stroke-width="2"/>
+    <rect x="1088" y="234" width="88" height="12" rx="6" fill="#e8ddf4"/>
+    <text x="1088" y="286" class="zh card-title">儿童成长</text>
+    <text x="1088" y="330" class="zh card-copy">早餐补充 / 成长期</text>
+    <text x="1088" y="362" class="zh card-copy">学习阶段营养</text>
+  </g>
+
+  <g filter="url(#cardShadow)">
+    <rect x="186" y="622" width="354" height="184" rx="28" fill="#fbf9fe" stroke="#d8cde7" stroke-width="2"/>
+    <rect x="214" y="650" width="88" height="12" rx="6" fill="#e8ddf4"/>
+    <text x="214" y="702" class="zh card-title">自我养护</text>
+    <text x="214" y="746" class="zh card-copy">早餐 / 下午茶 / 代餐感</text>
+    <text x="214" y="778" class="zh card-copy">日常营养补充</text>
+  </g>
+
+  <g filter="url(#cardShadow)">
+    <rect x="1060" y="622" width="354" height="184" rx="28" fill="#fbf9fe" stroke="#d8cde7" stroke-width="2"/>
+    <rect x="1088" y="650" width="88" height="12" rx="6" fill="#e8ddf4"/>
+    <text x="1088" y="702" class="zh card-title">轻运动或控糖</text>
+    <text x="1088" y="746" class="zh card-copy">运动后 / 饱腹管理</text>
+    <text x="1088" y="778" class="zh card-copy">轻负担营养补充</text>
+  </g>
+
+  <g filter="url(#cardShadow)">
+    <circle cx="800" cy="500" r="150" fill="url(#hubFill)" stroke="#b999d6" stroke-width="4"/>
+    <circle cx="800" cy="500" r="124" fill="none" stroke="#ffffff" stroke-width="2" opacity="0.9"/>
+    <rect x="700" y="404" width="200" height="42" rx="21" fill="#f5effa" stroke="#dbceea"/>
+    <text x="800" y="433" text-anchor="middle" class="zh" font-size="26" font-weight="700" fill="#6c4192">核心购买者</text>
+    <text x="800" y="502" text-anchor="middle" class="zh" font-size="28" font-weight="700" fill="#2f3040">35-80+ 女性家庭营养管理者</text>
+  </g>
+</svg>

@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+  <title id="title">市场增长飞轮｜先卖货，再反哺品牌</title>
+  <desc id="desc">展示市场增长飞轮的培训示意图，包括达人测试、自播承接、利润反哺、品牌建设四个模块围绕增长飞轮循环。</desc>
+  <defs>
+    <linearGradient id="titleBar" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#0a6d58"/>
+      <stop offset="100%" stop-color="#0d8368"/>
+    </linearGradient>
+    <linearGradient id="hubFill" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e5f5ef"/>
+      <stop offset="100%" stop-color="#d5ece4"/>
+    </linearGradient>
+    <pattern id="softDots" width="24" height="24" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1.1" fill="#dce9e4"/>
+    </pattern>
+    <filter id="cardShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="10" stdDeviation="16" flood-color="#0f3b31" flood-opacity="0.08"/>
+    </filter>
+    <marker id="arcArrow" markerWidth="14" markerHeight="14" refX="10" refY="7" orient="auto">
+      <path d="M0,0 L14,7 L0,14 Z" fill="#0b7b61"/>
+    </marker>
+    <style>
+      .zh {
+        font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      }
+      .title {
+        font-family: "Avenir Next", "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+        font-weight: 700;
+      }
+      .card-title {
+        font-size: 28px;
+        font-weight: 700;
+        fill: #0a7860;
+      }
+      .card-copy {
+        font-size: 18px;
+        font-weight: 500;
+        fill: #5e6670;
+      }
+    </style>
+  </defs>
+
+  <rect width="1600" height="900" fill="#f5f8f6"/>
+  <rect width="1600" height="900" fill="url(#softDots)" opacity="0.6"/>
+
+  <g filter="url(#cardShadow)">
+    <rect x="72" y="38" width="1456" height="106" rx="26" fill="url(#titleBar)"/>
+  </g>
+  <text x="800" y="104" text-anchor="middle" class="zh" font-size="46" font-weight="700" fill="#ffffff">市场增长飞轮｜先卖货，再反哺品牌</text>
+
+  <circle cx="800" cy="500" r="268" fill="none" stroke="#b5ddd1" stroke-width="10"/>
+  <path d="M 802 232 A 268 268 0 0 1 1068 498" fill="none" stroke="#b5ddd1" stroke-width="10" marker-end="url(#arcArrow)"/>
+  <path d="M 1068 502 A 268 268 0 0 1 800 768" fill="none" stroke="#b5ddd1" stroke-width="10" marker-end="url(#arcArrow)"/>
+  <path d="M 798 768 A 268 268 0 0 1 532 500" fill="none" stroke="#b5ddd1" stroke-width="10" marker-end="url(#arcArrow)"/>
+  <path d="M 532 498 A 268 268 0 0 1 800 232" fill="none" stroke="#b5ddd1" stroke-width="10" marker-end="url(#arcArrow)"/>
+
+  <g filter="url(#cardShadow)">
+    <circle cx="800" cy="500" r="154" fill="url(#hubFill)" stroke="#a3d8ca" stroke-width="4"/>
+    <circle cx="800" cy="500" r="126" fill="none" stroke="#ffffff" stroke-width="2" opacity="0.9"/>
+    <text x="800" y="520" text-anchor="middle" class="zh" font-size="54" font-weight="700" fill="#0a7a61">增长飞轮</text>
+  </g>
+
+  <g filter="url(#cardShadow)">
+    <rect x="640" y="160" width="320" height="186" rx="28" fill="#fbfefc" stroke="#a9d8cb" stroke-width="3"/>
+    <text x="670" y="214" class="zh card-title">达人测试</text>
+    <text x="670" y="260" class="zh card-copy">测试卖点 / 测试内容</text>
+    <text x="670" y="292" class="zh card-copy">找到高转化角度</text>
+  </g>
+
+  <g filter="url(#cardShadow)">
+    <rect x="1080" y="406" width="320" height="186" rx="28" fill="#fbfefc" stroke="#a9d8cb" stroke-width="3"/>
+    <text x="1110" y="460" class="zh card-title">自播承接</text>
+    <text x="1110" y="506" class="zh card-copy">直播间承接</text>
+    <text x="1110" y="538" class="zh card-copy">沉淀稳定成交模型</text>
+  </g>
+
+  <g filter="url(#cardShadow)">
+    <rect x="640" y="654" width="320" height="186" rx="28" fill="#fbfefc" stroke="#a9d8cb" stroke-width="3"/>
+    <text x="670" y="708" class="zh card-title">利润反哺</text>
+    <text x="670" y="754" class="zh card-copy">把利润继续投入</text>
+    <text x="670" y="786" class="zh card-copy">放大有效内容</text>
+  </g>
+
+  <g filter="url(#cardShadow)">
+    <rect x="200" y="406" width="320" height="186" rx="28" fill="#fbfefc" stroke="#a9d8cb" stroke-width="3"/>
+    <text x="230" y="460" class="zh card-title">品牌建设</text>
+    <text x="230" y="506" class="zh card-copy">优化内容资产</text>
+    <text x="230" y="538" class="zh card-copy">提升长期复购力</text>
+  </g>
+
+  <line x1="800" y1="346" x2="800" y2="316" stroke="#c2e4db" stroke-width="6" stroke-linecap="round"/>
+  <line x1="1080" y1="500" x2="1050" y2="500" stroke="#c2e4db" stroke-width="6" stroke-linecap="round"/>
+  <line x1="800" y1="654" x2="800" y2="624" stroke="#c2e4db" stroke-width="6" stroke-linecap="round"/>
+  <line x1="550" y1="500" x2="520" y2="500" stroke="#c2e4db" stroke-width="6" stroke-linecap="round"/>
+</svg>

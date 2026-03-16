@@ -1,0 +1,112 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="940" viewBox="0 0 1600 940" role="img" aria-labelledby="title desc">
+  <title id="title">阿瓦鲁品牌转型示意图</title>
+  <desc id="desc">用于培训文件的品牌转向图，从过去定位，经由转型触发点，转向新的方向，强调非有机A2奶源成为现实产品基础。</desc>
+  <defs>
+    <linearGradient id="accentBar" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#b55e4d"/>
+      <stop offset="50%" stop-color="#1d5fa8"/>
+      <stop offset="100%" stop-color="#3f7b5a"/>
+    </linearGradient>
+    <linearGradient id="flowBand" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#f4dfda"/>
+      <stop offset="50%" stop-color="#e3edf9"/>
+      <stop offset="100%" stop-color="#e3efe6"/>
+    </linearGradient>
+    <pattern id="dotGrid" width="28" height="28" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1.2" fill="#d7ddd7"/>
+    </pattern>
+    <filter id="cardShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="12" stdDeviation="18" flood-color="#0f2740" flood-opacity="0.08"/>
+    </filter>
+    <marker id="flowArrow" markerWidth="14" markerHeight="14" refX="10" refY="7" orient="auto">
+      <path d="M0,0 L14,7 L0,14 Z" fill="#1d5fa8"/>
+    </marker>
+  </defs>
+
+  <rect width="1600" height="940" fill="#f7f5f1"/>
+  <rect width="1600" height="940" fill="url(#dotGrid)" opacity="0.45"/>
+  <rect x="0" y="0" width="1600" height="8" fill="url(#accentBar)"/>
+  <rect x="80" y="54" width="152" height="38" rx="19" fill="#eaf1fa"/>
+  <text x="156" y="79" text-anchor="middle" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, sans-serif" font-size="18" font-weight="700" fill="#1d5fa8">品牌转向示意</text>
+  <text x="80" y="144" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, sans-serif" font-size="46" font-weight="700" fill="#102741">阿瓦鲁品牌转型｜高端小众有机奶转向A2 精准营养奶粉</text>
+  <text x="80" y="190" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, sans-serif" font-size="22" font-weight="500" fill="#546170">从“有机稀缺溢价”切换到“可信奶源 + 吸收优势 + 精准营养 + 多场景复购”</text>
+
+  <rect x="80" y="228" width="1440" height="22" rx="11" fill="url(#flowBand)" opacity="0.95"/>
+
+  <g filter="url(#cardShadow)">
+    <rect x="80" y="278" width="410" height="548" rx="30" fill="#fffdfb" stroke="#e4d0ca" stroke-width="2"/>
+    <rect x="112" y="310" width="64" height="34" rx="17" fill="#f6e6e1"/>
+    <text x="144" y="333" text-anchor="middle" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, sans-serif" font-size="18" font-weight="700" fill="#a45242">01</text>
+    <text x="112" y="388" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, sans-serif" font-size="31" font-weight="700" fill="#a45242">过去定位</text>
+
+    <rect x="112" y="420" width="346" height="74" rx="20" fill="#f7e9e5"/>
+    <circle cx="145" cy="457" r="10" fill="#b86453"/>
+    <circle cx="145" cy="457" r="3" fill="#fff"/>
+    <text x="174" y="464" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, sans-serif" font-size="21" font-weight="600" fill="#6f544d">Organic 高端感</text>
+
+    <rect x="112" y="514" width="346" height="74" rx="20" fill="#f7e9e5"/>
+    <circle cx="145" cy="551" r="10" fill="#b86453"/>
+    <circle cx="145" cy="551" r="3" fill="#fff"/>
+    <text x="174" y="558" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, sans-serif" font-size="21" font-weight="600" fill="#6f544d">稀缺故事</text>
+
+    <rect x="112" y="608" width="346" height="74" rx="20" fill="#f7e9e5"/>
+    <circle cx="145" cy="645" r="10" fill="#b86453"/>
+    <circle cx="145" cy="645" r="3" fill="#fff"/>
+    <text x="174" y="652" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, sans-serif" font-size="21" font-weight="600" fill="#6f544d">有机认证带来的溢价</text>
+
+    <rect x="112" y="702" width="346" height="96" rx="20" fill="#f7e9e5"/>
+    <circle cx="145" cy="739" r="10" fill="#b86453"/>
+    <circle cx="145" cy="739" r="3" fill="#fff"/>
+    <text x="174" y="734" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, sans-serif" font-size="20" font-weight="600" fill="#6f544d">更偏礼赠或</text>
+    <text x="174" y="760" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, sans-serif" font-size="20" font-weight="600" fill="#6f544d">小众高配叙事</text>
+  </g>
+
+  <path d="M 490 513 C 520 513, 532 513, 555 513" fill="none" stroke="#1d5fa8" stroke-width="8" stroke-linecap="round" marker-end="url(#flowArrow)"/>
+  <path d="M 1035 513 C 1062 513, 1074 513, 1097 513" fill="none" stroke="#1d5fa8" stroke-width="8" stroke-linecap="round" marker-end="url(#flowArrow)"/>
+
+  <g filter="url(#cardShadow)">
+    <rect x="565" y="320" width="470" height="410" rx="34" fill="#ffffff" stroke="#cbd8e7" stroke-width="2"/>
+    <rect x="735" y="352" width="130" height="38" rx="19" fill="#edf4fc"/>
+    <text x="800" y="377" text-anchor="middle" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, sans-serif" font-size="18" font-weight="700" fill="#1d5fa8">02</text>
+    <text x="800" y="432" text-anchor="middle" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, sans-serif" font-size="32" font-weight="700" fill="#1d5fa8">转型触发点</text>
+
+    <rect x="678" y="465" width="244" height="60" rx="30" fill="#f3f6fa" stroke="#d8dee8"/>
+    <text x="800" y="505" text-anchor="middle" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, sans-serif" font-size="24" font-weight="700" fill="#657181">现实</text>
+
+    <circle cx="800" cy="596" r="98" fill="#eef4fb"/>
+    <text x="800" y="588" text-anchor="middle" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, sans-serif" font-size="44" font-weight="700" fill="#1d5fa8">非有机 A2奶源</text>
+    <line x1="696" y1="618" x2="904" y2="618" stroke="#c8d7ea" stroke-width="3" stroke-linecap="round"/>
+    <text x="800" y="666" text-anchor="middle" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, sans-serif" font-size="28" font-weight="600" fill="#425365">成为现实产品基础</text>
+  </g>
+
+  <g filter="url(#cardShadow)">
+    <rect x="1110" y="278" width="410" height="548" rx="30" fill="#fcfdfb" stroke="#d3e2d7" stroke-width="2"/>
+    <rect x="1142" y="310" width="64" height="34" rx="17" fill="#e7f0e8"/>
+    <text x="1174" y="333" text-anchor="middle" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, sans-serif" font-size="18" font-weight="700" fill="#3f7b5a">03</text>
+    <text x="1142" y="388" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, sans-serif" font-size="31" font-weight="700" fill="#3f7b5a">新的方向</text>
+
+    <rect x="1142" y="420" width="346" height="74" rx="20" fill="#e8f1e7"/>
+    <circle cx="1175" cy="457" r="10" fill="#4d8967"/>
+    <circle cx="1175" cy="457" r="3" fill="#fff"/>
+    <text x="1204" y="464" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, sans-serif" font-size="20" font-weight="600" fill="#50705f">新西兰奶源企业品牌</text>
+
+    <rect x="1142" y="514" width="346" height="74" rx="20" fill="#e8f1e7"/>
+    <circle cx="1175" cy="551" r="10" fill="#4d8967"/>
+    <circle cx="1175" cy="551" r="3" fill="#fff"/>
+    <text x="1204" y="558" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, sans-serif" font-size="20" font-weight="600" fill="#50705f">A2酪蛋白更容易被吸收</text>
+
+    <rect x="1142" y="608" width="346" height="92" rx="20" fill="#e8f1e7"/>
+    <circle cx="1175" cy="645" r="10" fill="#4d8967"/>
+    <circle cx="1175" cy="645" r="3" fill="#fff"/>
+    <text x="1204" y="639" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, sans-serif" font-size="19" font-weight="600" fill="#50705f">针对各种场景人群</text>
+    <text x="1204" y="666" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, sans-serif" font-size="19" font-weight="600" fill="#50705f">精准营养</text>
+
+    <rect x="1142" y="720" width="346" height="92" rx="20" fill="#e8f1e7"/>
+    <circle cx="1175" cy="757" r="10" fill="#4d8967"/>
+    <circle cx="1175" cy="757" r="3" fill="#fff"/>
+    <text x="1204" y="748" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, sans-serif" font-size="19" font-weight="600" fill="#50705f">性价比 + 长期复购</text>
+    <text x="1204" y="775" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, sans-serif" font-size="19" font-weight="600" fill="#50705f">多场景使用</text>
+  </g>
+
+  <text x="800" y="886" text-anchor="middle" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, sans-serif" font-size="22" font-weight="500" fill="#6c7682">图1 品牌转向示意图</text>
+</svg>
