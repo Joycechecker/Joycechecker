@@ -316,26 +316,36 @@ async function requestDoubaoChatTextRaw(
 
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
+  const timeoutSentinel = Symbol("doubao-timeout");
 
   try {
-    const response = await fetch(`${config.baseURL.replace(/\/$/, "")}/chat/completions`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${config.apiKey}`,
-      },
-      body: JSON.stringify({
-        model: config.textModel,
-        temperature: 0.7,
-        max_tokens: maxTokens,
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt },
-        ],
+    const response = await Promise.race<Response | typeof timeoutSentinel>([
+      fetch(`${config.baseURL.replace(/\/$/, "")}/chat/completions`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${config.apiKey}`,
+        },
+        body: JSON.stringify({
+          model: config.textModel,
+          temperature: 0.7,
+          max_tokens: maxTokens,
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: userPrompt },
+          ],
+        }),
+        signal: controller.signal,
+        cache: "no-store",
       }),
-      signal: controller.signal,
-      cache: "no-store",
-    });
+      new Promise<typeof timeoutSentinel>((resolve) => {
+        setTimeout(() => resolve(timeoutSentinel), timeoutMs);
+      }),
+    ]);
+
+    if (response === timeoutSentinel) {
+      throw new Error("AI 选题分析暂时超时，请重试。");
+    }
 
     if (!response.ok) {
       const raw = await response.text();
