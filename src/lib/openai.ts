@@ -303,6 +303,61 @@ function getClient(config: RuntimeConfig, timeoutMs = TEXT_REQUEST_TIMEOUT_MS) {
   });
 }
 
+async function requestDoubaoChatTextRaw(
+  config: RuntimeConfig,
+  systemPrompt: string,
+  userPrompt: string,
+  maxTokens: number,
+  timeoutMs: number,
+) {
+  if (!config.apiKey || !config.baseURL) {
+    throw new Error("当前环境没有可用的豆包配置。");
+  }
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const response = await fetch(`${config.baseURL.replace(/\/$/, "")}/chat/completions`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${config.apiKey}`,
+      },
+      body: JSON.stringify({
+        model: config.textModel,
+        temperature: 0.7,
+        max_tokens: maxTokens,
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt },
+        ],
+      }),
+      signal: controller.signal,
+      cache: "no-store",
+    });
+
+    if (!response.ok) {
+      const raw = await response.text();
+      throw new Error(raw || `豆包接口请求失败（${response.status}）。`);
+    }
+
+    const payload = (await response.json()) as {
+      choices?: Array<{ message?: { content?: string | null } }>;
+    };
+
+    return extractChatText(payload.choices?.[0]?.message?.content ?? "").trim();
+  } catch (error) {
+    if (error instanceof Error && error.name === "AbortError") {
+      throw new Error("AI 选题分析暂时超时，请重试。");
+    }
+
+    throw error;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 function extractJsonBlock(raw: string) {
   const trimmed = raw.trim().replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "");
 
@@ -904,15 +959,24 @@ async function requestLeanTopicStrategy(
   const style: TextApiStyle = config.providerId === "doubao" ? "chat" : config.textApiStyle;
 
   try {
-    const rawText = await requestArticleTextByStyle(
-      client,
-      config,
-      { ...brief, articleLength: "short" },
-      style,
-      TOPIC_STRATEGY_SYSTEM_PROMPT,
-      buildLeanTopicStrategyPrompt(brief),
-      700,
-    );
+    const rawText =
+      config.providerId === "doubao"
+        ? await requestDoubaoChatTextRaw(
+            config,
+            TOPIC_STRATEGY_SYSTEM_PROMPT,
+            buildLeanTopicStrategyPrompt(brief),
+            700,
+            6500,
+          )
+        : await requestArticleTextByStyle(
+            client,
+            config,
+            { ...brief, articleLength: "short" },
+            style,
+            TOPIC_STRATEGY_SYSTEM_PROMPT,
+            buildLeanTopicStrategyPrompt(brief),
+            700,
+          );
 
     if (!rawText) {
       throw new Error("模型没有返回选题策略。");
