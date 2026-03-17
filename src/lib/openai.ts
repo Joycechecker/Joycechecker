@@ -199,7 +199,7 @@ export function getRuntimeDiagnostics() {
 
 export async function runModelConnectivityCheck() {
   const config = getRuntimeConfig();
-  const client = getClient(config, 12000);
+  const client = getClient(config, 7000);
 
   if (!client) {
     return {
@@ -901,43 +901,37 @@ async function requestLeanTopicStrategy(
   config: RuntimeConfig,
   brief: BriefInput,
 ) {
-  const preferredStyle = config.providerId === "doubao" ? "chat" : config.textApiStyle;
-  const fallbackStyle: TextApiStyle = preferredStyle === "chat" ? "responses" : "chat";
-  const styles = config.providerId === "doubao" ? [preferredStyle, fallbackStyle] : [preferredStyle];
-  let lastError: unknown;
+  const style: TextApiStyle = config.providerId === "doubao" ? "chat" : config.textApiStyle;
 
-  for (const style of styles) {
-    try {
-      const rawText = await requestArticleTextByStyle(
-        client,
-        config,
-        { ...brief, articleLength: "short" },
-        style,
-        TOPIC_STRATEGY_SYSTEM_PROMPT,
-        buildLeanTopicStrategyPrompt(brief),
-        700,
-      );
+  try {
+    const rawText = await requestArticleTextByStyle(
+      client,
+      config,
+      { ...brief, articleLength: "short" },
+      style,
+      TOPIC_STRATEGY_SYSTEM_PROMPT,
+      buildLeanTopicStrategyPrompt(brief),
+      700,
+    );
 
-      if (!rawText) {
-        throw new Error("模型没有返回选题策略。");
-      }
-
-      const parsed = parseModelJson<PartialTopicStrategy>(rawText);
-      const strategy = normalizeTopicStrategy(parsed, brief);
-      return {
-        strategy: {
-          ...strategy,
-          inferredDirections: strategy.inferredDirections.slice(0, 3),
-          suggestedTopics: strategy.suggestedTopics.slice(0, 3),
-        },
-        model: `${config.textModel} (${style})`,
-      };
-    } catch (error) {
-      lastError = error;
+    if (!rawText) {
+      throw new Error("模型没有返回选题策略。");
     }
-  }
 
-  throw lastError instanceof Error ? lastError : new Error("生成选题策略失败。");
+    const parsed = parseModelJson<PartialTopicStrategy>(rawText);
+    const strategy = normalizeTopicStrategy(parsed, brief);
+
+    return {
+      strategy: {
+        ...strategy,
+        inferredDirections: strategy.inferredDirections.slice(0, 3),
+        suggestedTopics: strategy.suggestedTopics.slice(0, 3),
+      },
+      model: `${config.textModel} (${style})`,
+    };
+  } catch (error) {
+    throw error instanceof Error ? error : new Error("生成选题策略失败。");
+  }
 }
 
 async function requestStructuredTopicStrategy(
@@ -1066,7 +1060,7 @@ export async function generateTopicStrategy(brief: BriefInput) {
 
 export async function generateLeanTopicStrategy(brief: BriefInput) {
   const config = getRuntimeConfig();
-  const client = getClient(config, 12000);
+  const client = getClient(config, 7000);
 
   if (!client) {
     throw new Error("当前环境没有可用的 AI 配置，请先检查 API Key 和模型。");
