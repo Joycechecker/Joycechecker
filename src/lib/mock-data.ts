@@ -126,6 +126,7 @@ export function createMockArticle(brief: BriefInput): GeneratedArticle {
 
   return {
     mode: "mock",
+    draftStage: "full",
     title: `${promotionLabel} 内容工作台示例：${brief.topic}`,
     subtitle: `给 ${brief.audience} 的一篇可直接排版成公众号的 AI 初稿`,
     dek: `这是一份自动生成的首版公众号成稿示例，已经带上导语、章节结构、强调语和配图提示词。`,

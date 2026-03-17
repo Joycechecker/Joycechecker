@@ -49,6 +49,39 @@ export const ARTICLE_SYSTEM_PROMPT = `
 ${JSON.stringify(articleShapeExample)}
 `.trim();
 
+
+export const ARTICLE_OUTLINE_SYSTEM_PROMPT = `
+你是中文公众号主编。
+把 brief 转成一版“可继续补全文稿”的公众号提纲稿。
+
+输出要求：
+1. 只输出 JSON，不要 Markdown，不要解释，不要代码块。
+2. 所有文案必须使用简体中文。
+3. 这是提纲稿，不是完整版。每个章节只保留 1 句核心表达。
+4. sections 数量要和用户要求长度匹配：short=3，medium=4，long=5。
+5. 所有字符串值必须是单行字符串，不得包含裸换行符。
+6. 保持字段结构完整，不得缺字段。
+
+严格按照这个 JSON 结构返回，不得新增字段，也不得缺字段：
+${JSON.stringify(articleShapeExample)}
+`.trim();
+
+export const ARTICLE_EXPANSION_SYSTEM_PROMPT = `
+你是中文公众号主编。
+你的任务是把一版已经确认方向的公众号提纲稿补全文稿。
+
+输出要求：
+1. 只输出 JSON，不要 Markdown，不要解释，不要代码块。
+2. 所有文案必须使用简体中文。
+3. 保留现有标题和章节结构，只把每节扩成可发布正文。
+4. 每个章节最多 2 段，每段 1 到 2 句。
+5. 每个 section 都要补上 imagePrompt 和 imageAlt。
+6. 所有字符串值必须是单行字符串，不得包含裸换行符；需要分段时只能放进数组。
+
+严格按照这个 JSON 结构返回，不得新增字段，也不得缺字段：
+${JSON.stringify(articleShapeExample)}
+`.trim();
+
 export const TOPIC_STRATEGY_SYSTEM_PROMPT = `
 你是中文公众号内容策划。
 你的任务是先判断一个公众号适合做哪些内容方向，再给出一组可执行的选题建议。
@@ -82,7 +115,35 @@ export const REFINE_SYSTEM_PROMPT = `
 ${JSON.stringify(articleShapeExample)}
 `.trim();
 
+export function buildArticleOutlinePrompt(brief: BriefInput) {
+  return `
+请根据以下 brief 生成一版公众号提纲稿。
+
+公众号阶段：${brief.accountMode === "new" ? "新号" : "老号"}
+公众号名称：${brief.accountName}
+公众号主要目标：${brief.accountPurpose}
+公众号内容方向：${brief.accountDirection}
+本次新增规划方向 / 新栏目尝试：${brief.directionUpdate || "未填写"}
+本次选题：${brief.topic}
+推广对象名称：${brief.brandName || "未填写"}
+目标受众：${brief.audience}
+人工意见 / 修正判断：${brief.editorNotes || "未填写"}
+内容目标：${brief.objective}
+必须覆盖的信息点：
+${brief.keyPoints}
+
+要求：
+- 这是一版提纲稿，不是完整版。
+- 标题、导语、CTA 先写到位。
+- 每个章节只保留 1 句核心句，放进 paragraphs 数组。
+- summary 要更像“这节要讲什么”。
+- conclusion 用 1 句收口。
+- coverPrompt 和 imagePrompt 可以先写短句，不要太长。
+  `.trim();
+}
+
 export function buildArticlePrompt(brief: BriefInput) {
+
   return `
 请根据以下 brief 生成一篇可直接进入公众号排版流程的文章。
 
@@ -210,14 +271,37 @@ export function buildLeanTopicStrategyPrompt(brief: BriefInput) {
 要求：
 - 只输出 JSON，不要解释。
 - accountSnapshot 控制在 1 句。
-- inferredDirections 输出 3 条。
-- suggestedTopics 输出 4 条。
+- inferredDirections 输出 2 到 3 条。
+- suggestedTopics 输出 3 条。
 - 选题必须像公众号题目方向，不要像短视频标题。
 - 如果用户写了人工意见，优先服从。
   `.trim();
 }
 
+export function buildDraftExpansionPrompt(
+  brief: BriefInput,
+  article: GeneratedArticle,
+) {
+  return `
+请把下面这版公众号提纲稿补成可发布的完整成稿。
+
+brief：
+${JSON.stringify(brief, null, 2)}
+
+当前提纲稿：
+${JSON.stringify(article, null, 2)}
+
+补全要求：
+- 保留当前标题、导语、章节顺序和 CTA 方向。
+- 每个章节扩成 1 到 2 段短正文。
+- 每节都要补出适合公众号配图的 imagePrompt。
+- 语气继续遵守 brief，不要写成硬广。
+- 如果提纲里的句子已经不错，尽量沿用，不要完全重写。
+  `.trim();
+}
+
 export function buildRefinePrompt(
+
   brief: BriefInput,
   article: GeneratedArticle,
   instruction: string,

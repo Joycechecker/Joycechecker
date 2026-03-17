@@ -5,6 +5,7 @@ export type ImageSource = "upload" | "ai" | "mock";
 export type AccountMode = "new" | "existing";
 export type PromotionType = "brand" | "service" | "personal" | "none";
 export type HistoryReferenceSource = "fetched" | "manual" | "search";
+export type DraftStage = "outline" | "full";
 
 export interface BriefInput {
   accountMode: AccountMode;
@@ -51,6 +52,7 @@ export interface ArticleSection {
 
 export interface GeneratedArticle {
   mode: "mock" | "live";
+  draftStage: DraftStage;
   title: string;
   subtitle: string;
   dek: string;
@@ -74,6 +76,7 @@ export interface GenerateResponse {
   source: "mock" | "ai";
   provider: string;
   model: string;
+  stage: DraftStage;
 }
 
 export interface TopicStrategy {
@@ -119,4 +122,11 @@ export interface RefineRequest {
   brief: BriefInput;
   article: GeneratedArticle;
   instruction: string;
+}
+
+export interface ExpandDraftRequest {
+  brief: BriefInput;
+  article: GeneratedArticle;
+  productReferenceImageUrl?: string;
+  productReferenceImageName?: string;
 }

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { getSessionFromCookieHeader } from "@/lib/auth";
-import { generateArticle, generateImage } from "@/lib/openai";
+import { generateArticleOutline } from "@/lib/openai";
 import type { BriefInput } from "@/lib/types";
 
 type GenerateRequest =
@@ -22,20 +22,7 @@ export async function POST(request: Request) {
 
     const body = (await request.json()) as GenerateRequest;
     const brief = "brief" in body ? body.brief : body;
-    const productReferenceImageUrl =
-      "brief" in body ? body.productReferenceImageUrl : undefined;
-    const productReferenceImageName =
-      "brief" in body ? body.productReferenceImageName : undefined;
-    const result = await generateArticle(brief);
-
-    if (brief.includeImages && brief.autoCoverImage) {
-      const cover = await generateImage(result.article.coverPrompt, result.article.title, {
-        referenceImageUrl: productReferenceImageUrl,
-        referenceImageName: productReferenceImageName,
-      });
-      result.article.coverImageUrl = cover.imageUrl;
-      result.article.coverImageSource = cover.source;
-    }
+    const result = await generateArticleOutline(brief);
 
     return NextResponse.json(result);
   } catch (error) {

@@ -7,6 +7,7 @@ import { createMockArticle } from "@/lib/mock-data";
 import type {
   ArticleSection,
   BriefInput,
+  ExpandDraftRequest,
   GeneratedArticle,
   GenerateResponse,
   HistoryReference,
@@ -201,7 +202,7 @@ function textToPoints(text: string) {
     .filter(Boolean);
 }
 
-async function readApiPayload<T>(response: Response) {
+async function readApiPayload<T>(response: Response, scriptErrorMessage?: string) {
   const rawText = await response.text();
 
   if (!rawText) {
@@ -214,7 +215,7 @@ async function readApiPayload<T>(response: Response) {
     return {
       error:
         rawText.startsWith("Error")
-          ? `线上接口暂时异常：${rawText}`
+          ? scriptErrorMessage || "线上接口暂时异常，请稍后重试。"
           : "线上接口返回了非标准响应，请稍后重试。",
     } as T & { error?: string };
   }
@@ -587,6 +588,7 @@ export function ArticleWorkbench({ viewer }: ArticleWorkbenchProps) {
     createMockArticle(buildFreshBrief()),
   );
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isCompletingDraft, setIsCompletingDraft] = useState(false);
   const [isPlanningTopics, setIsPlanningTopics] = useState(false);
   const [isRefining, setIsRefining] = useState(false);
   const [isGeneratingCover, setIsGeneratingCover] = useState(false);
@@ -793,6 +795,7 @@ export function ArticleWorkbench({ viewer }: ArticleWorkbenchProps) {
   );
   const readyFieldCount = generationChecklist.length - missingGenerationFields.length;
   const isReadyToGenerate = missingGenerationFields.length === 0;
+  const isOutlineDraft = hasGeneratedDraft && article.draftStage === "outline";
   const workspaceStages = useMemo(
     () => [
       {
@@ -817,10 +820,10 @@ export function ArticleWorkbench({ viewer }: ArticleWorkbenchProps) {
         id: "assets" as const,
         label: "图片处理",
         hint: "封面和章节配图",
-        locked: !hasGeneratedDraft,
+        locked: !hasGeneratedDraft || article.draftStage !== "full",
       },
     ],
-    [hasGeneratedDraft],
+    [article.draftStage, hasGeneratedDraft],
   );
   const currentStageMeta =
     workspaceStages.find((item) => item.id === activeStage) || workspaceStages[0];
@@ -1041,10 +1044,10 @@ export function ArticleWorkbench({ viewer }: ArticleWorkbenchProps) {
         }),
       });
 
-      const payload = await readApiPayload<GenerateResponse>(response);
+      const payload = await readApiPayload<GenerateResponse>(response, "AI 提纲生成暂时超时，请重试。");
 
       if (!response.ok || !payload.article || payload.source !== "ai") {
-        throw new Error(payload.error || "AI 成稿生成暂时不可用，请稍后重试。");
+        throw new Error(payload.error || "AI 提纲生成暂时不可用，请稍后重试。");
       }
 
       startTransition(() => {
@@ -1058,12 +1061,13 @@ export function ArticleWorkbench({ viewer }: ArticleWorkbenchProps) {
           model: sanitizeSourceModelLabel(payload.model, payload.provider),
         });
       });
+      setError(null);
       saveAccountProfile({ silent: true });
-      setResultNotice("成稿已生成，右侧结果区可以直接预览、复制和导出。");
+      setResultNotice("提纲稿已生成，先确认结构，再点“补全正文”。");
       focusResultPanel();
     } catch (err) {
       setSourceInfo(defaultSourceInfo);
-      setError(err instanceof Error ? err.message : "AI 成稿生成暂时不可用，请稍后重试。");
+      setError(err instanceof Error ? err.message : "AI 提纲生成暂时不可用，请稍后重试。");
     } finally {
       setIsGenerating(false);
     }
@@ -1095,7 +1099,7 @@ export function ArticleWorkbench({ viewer }: ArticleWorkbenchProps) {
         body: JSON.stringify(brief),
       });
 
-      const payload = await readApiPayload<TopicStrategyResponse>(response);
+      const payload = await readApiPayload<TopicStrategyResponse>(response, "AI 选题分析暂时超时，请重试。");
 
       if (!response.ok || !payload.strategy || payload.source !== "ai") {
         throw new Error(payload.error || "AI 选题分析暂时不可用，请稍后重试。");
@@ -1109,12 +1113,63 @@ export function ArticleWorkbench({ viewer }: ArticleWorkbenchProps) {
         provider: payload.provider,
         model: sanitizeSourceModelLabel(payload.model, payload.provider),
       });
+      setError(null);
       saveAccountProfile({ silent: true });
     } catch (err) {
       setSourceInfo(defaultSourceInfo);
       setError(err instanceof Error ? err.message : "AI 选题分析暂时不可用，请稍后重试。");
     } finally {
       setIsPlanningTopics(false);
+    }
+  }
+
+  async function handleCompleteDraft() {
+    setIsCompletingDraft(true);
+    setError(null);
+    setImageNotice(null);
+    setResultNotice(null);
+
+    try {
+      const body: ExpandDraftRequest = {
+        brief,
+        article,
+        productReferenceImageUrl: article.productReferenceImageUrl,
+        productReferenceImageName: article.productReferenceImageName,
+      };
+
+      const response = await fetch("/api/generate/full", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
+      });
+
+      const payload = await readApiPayload<GenerateResponse>(response, "AI 成稿补全暂时超时，请重试。");
+
+      if (!response.ok || !payload.article || payload.source !== "ai") {
+        throw new Error(payload.error || "AI 成稿补全暂时不可用，请稍后重试。");
+      }
+
+      startTransition(() => {
+        setArticle(preserveUploadedImages(payload.article, article));
+        setHasGeneratedDraft(true);
+        setIsDraftOutdated(false);
+        setActiveStage("draft");
+        setSourceInfo({
+          source: payload.source,
+          provider: payload.provider,
+          model: sanitizeSourceModelLabel(payload.model, payload.provider),
+        });
+      });
+      setError(null);
+      saveAccountProfile({ silent: true });
+      setResultNotice("正文已补全，右侧结果区现在是完整成稿。你也可以继续手动修改再做 AI 优化。");
+      focusResultPanel();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "AI 成稿补全暂时不可用，请稍后重试。");
+    } finally {
+      setIsCompletingDraft(false);
     }
   }
 
@@ -1138,7 +1193,7 @@ export function ArticleWorkbench({ viewer }: ArticleWorkbenchProps) {
         body: JSON.stringify(body),
       });
 
-      const payload = await readApiPayload<GenerateResponse>(response);
+      const payload = await readApiPayload<GenerateResponse>(response, "AI 优化暂时超时，请重试。");
 
       if (!response.ok) {
         throw new Error(payload.error || "优化失败");
@@ -1155,6 +1210,7 @@ export function ArticleWorkbench({ viewer }: ArticleWorkbenchProps) {
           model: sanitizeSourceModelLabel(payload.model, payload.provider),
         });
       });
+      setError(null);
       setResultNotice("当前稿已更新，右侧结果区已同步最新版本。");
       focusResultPanel();
     } catch (err) {
@@ -1199,7 +1255,7 @@ export function ArticleWorkbench({ viewer }: ArticleWorkbenchProps) {
         error?: string;
         source?: string;
         notice?: string;
-      }>(response);
+      }>(response, "AI 章节配图暂时超时，请重试。");
 
       if (!response.ok || !payload.imageUrl) {
         throw new Error(payload.error || "生成图片失败");
@@ -1259,7 +1315,7 @@ export function ArticleWorkbench({ viewer }: ArticleWorkbenchProps) {
         error?: string;
         source?: string;
         notice?: string;
-      }>(response);
+      }>(response, "AI 封面图生成暂时超时，请重试。");
 
       if (!response.ok || !payload.imageUrl) {
         throw new Error(payload.error || "生成封面图失败");
@@ -1555,7 +1611,7 @@ export function ArticleWorkbench({ viewer }: ArticleWorkbenchProps) {
                   onClick={handleGenerate}
                   type="button"
                 >
-                  {isGenerating ? "AI 生成中..." : "一键生成成稿"}
+                  {isGenerating ? "AI 生成中..." : "生成提纲/短稿"}
                 </button>
               ) : (
                 <div className="generation-gate-card">
@@ -1760,12 +1816,12 @@ export function ArticleWorkbench({ viewer }: ArticleWorkbenchProps) {
                 onClick={handleTopicStrategy}
                 type="button"
               >
-                {isPlanningTopics ? "AI 分析中..." : "AI 分析内容方向"}
+                {isPlanningTopics ? "AI 判断中..." : "快速 AI 判断"}
               </button>
               <p className="help-text">
                 {brief.accountMode === "new"
-                  ? "新号会基于账号目标、长期方向和本次想验证的小方向给你首轮栏目建议；分析成功后也会自动把这个号加入号库。"
-                  : "老号如已配置腾讯联网搜索，会先按公众号名找候选历史文章；你也可以贴链接或手填标题兜底。如果这次想试一个新方向，AI 会优先给桥接式选题，不会直接把号写歪。"}
+                  ? "这一步会先做一轮快速 AI 判断，优先帮你确认账号方向和首批可写选题。"
+                  : "这一步会先做一轮快速 AI 判断，优先确认老号适合继续写什么，以及这次新方向该怎么桥接。"}
               </p>
             </div>
 
@@ -2047,9 +2103,9 @@ export function ArticleWorkbench({ viewer }: ArticleWorkbenchProps) {
           <div className="stage-submit-card">
             <div className="stage-submit-copy">
               <p className="panel-kicker">提交本次成稿要求</p>
-              <h3>确认这一页后，直接生成这次成稿</h3>
+              <h3>确认这一页后，先生成这次提纲稿</h3>
               <p className="help-text">
-                这里提交的是你刚刚填写的本次选题、人群、要点和风格，不用再回到顶部找按钮。
+                这里提交的是你刚刚填写的本次选题、人群、要点和风格。先出提纲，再在下一步补全正文。
               </p>
             </div>
             {isReadyToGenerate ? (
@@ -2059,7 +2115,7 @@ export function ArticleWorkbench({ viewer }: ArticleWorkbenchProps) {
                 onClick={handleGenerate}
                 type="button"
               >
-                {isGenerating ? "AI 生成中..." : "提交并生成成稿"}
+                {isGenerating ? "AI 生成中..." : "提交并生成提纲"}
               </button>
             ) : (
               <div className="generation-gate-card stage-submit-gate">
@@ -2089,8 +2145,8 @@ export function ArticleWorkbench({ viewer }: ArticleWorkbenchProps) {
             </div>
             {!hasGeneratedDraft ? (
               <div className="draft-empty-state">
-                <strong>这里会显示本次真实生成稿的大纲</strong>
-                <p>先完成上面的初始信息，再点“一键生成成稿”，这里才会同步成当前稿结构。</p>
+                <strong>这里会显示本次 AI 生成的提纲或正文结构</strong>
+                <p>先完成上面的初始信息，再点“生成提纲/短稿”，这里会先出现本次短稿结构。</p>
               </div>
             ) : (
               <>
@@ -2112,29 +2168,42 @@ export function ArticleWorkbench({ viewer }: ArticleWorkbenchProps) {
             <div className="action-row">
               <div>
                 <p className="panel-kicker">编辑当前稿</p>
-                <h3>手动改，再让 AI 优化</h3>
+                <h3>{isOutlineDraft ? "先确认提纲，再补全文稿" : "手动改，再让 AI 优化"}</h3>
               </div>
               {hasGeneratedDraft ? (
-                <button
-                  className="primary-button"
-                  disabled={isRefining || isDraftOutdated}
-                  onClick={handleRefine}
-                  type="button"
-                >
-                  {isRefining ? "AI 优化中..." : "AI 优化当前稿"}
-                </button>
+                isOutlineDraft ? (
+                  <button
+                    className="primary-button"
+                    disabled={isCompletingDraft || isDraftOutdated}
+                    onClick={handleCompleteDraft}
+                    type="button"
+                  >
+                    {isCompletingDraft ? "补全中..." : "补全正文"}
+                  </button>
+                ) : (
+                  <button
+                    className="primary-button"
+                    disabled={isRefining || isDraftOutdated}
+                    onClick={handleRefine}
+                    type="button"
+                  >
+                    {isRefining ? "AI 优化中..." : "AI 优化当前稿"}
+                  </button>
+                )
               ) : null}
             </div>
             {!hasGeneratedDraft ? (
               <div className="draft-empty-state">
-                <strong>还没有可优化的当前稿</strong>
-                <p>这里会在你完成一次真实生成后，展示那一版稿件的可编辑内容。现在不会再显示默认 mock 草稿。</p>
+                <strong>还没有可编辑的当前稿</strong>
+                <p>这里会在你完成一次真实生成后，展示那一版提纲稿或完整稿的可编辑内容。</p>
               </div>
             ) : (
               <>
                 <p className="help-text">
                   {isDraftOutdated
                     ? "你已经修改了前置 brief，下面这版仍是上一轮生成稿。请先重新生成，再做 AI 优化。"
+                    : isOutlineDraft
+                    ? "这是一版提纲稿。你可以先手动调整标题和章节方向，再点“补全正文”。"
                     : "先在下面直接改准内容，再写一句优化要求，AI 会基于这版继续修，不会默认推翻重写。"}
                 </p>
 
@@ -2595,10 +2664,12 @@ export function ArticleWorkbench({ viewer }: ArticleWorkbenchProps) {
             <div className="result-head-side">
               <div className="status-pill">
                 {!hasGeneratedDraft
-                  ? "待生成"
-                  : sourceInfo.source === "mock"
-                    ? "Mock Ready"
-                    : `${sourceInfo.provider} Live`}
+                  ? "AI 待生成"
+                  : sourceInfo.source === "ai"
+                    ? isOutlineDraft
+                      ? `${sourceInfo.provider} 提纲稿`
+                      : `${sourceInfo.provider} 完整稿`
+                    : "AI 暂不可用"}
               </div>
               <div className="preview-mode-pills">
                 <span className="is-active">手机</span>
@@ -2622,7 +2693,7 @@ export function ArticleWorkbench({ viewer }: ArticleWorkbenchProps) {
                 {!hasGeneratedDraft ? (
                   <div className="preview-empty-state">
                     <strong>这里会显示本次真实生成稿的预览</strong>
-                    <p>完成上面的初始信息后点“一键生成成稿”，右侧才会出现这次稿件的移动端成品视图。</p>
+                    <p>完成上面的初始信息后点“生成提纲/短稿”，右侧会先出现提纲稿预览，补全正文后再变成完整成品视图。</p>
                   </div>
                 ) : (
                   <div className="phone-screen">
@@ -2635,7 +2706,7 @@ export function ArticleWorkbench({ viewer }: ArticleWorkbenchProps) {
                       {isDraftOutdated ? (
                         <div className="stale-preview-banner">当前预览仍是上一轮生成稿</div>
                       ) : null}
-                      <p className="article-tag">AI 排版稿</p>
+                      <p className="article-tag">{isOutlineDraft ? "AI 提纲稿" : "AI 排版稿"}</p>
                       <h1>{article.title}</h1>
                       <p className="article-subtitle">{article.subtitle}</p>
                       <div className="wechat-meta-line">

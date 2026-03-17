@@ -5,15 +5,17 @@ import { jsonrepair } from "jsonrepair";
 
 import { buildPlaceholderImageDataUrl, createMockArticle } from "@/lib/mock-data";
 import {
-  ARTICLE_SYSTEM_PROMPT,
+  ARTICLE_EXPANSION_SYSTEM_PROMPT,
+  ARTICLE_OUTLINE_SYSTEM_PROMPT,
   REFINE_SYSTEM_PROMPT,
   TOPIC_STRATEGY_SYSTEM_PROMPT,
-  buildArticlePrompt,
+  buildArticleOutlinePrompt,
+  buildDraftExpansionPrompt,
   buildLeanTopicStrategyPrompt,
   buildRefinePrompt,
   buildTopicStrategyPrompt,
 } from "@/lib/prompts";
-import type { BriefInput, GeneratedArticle, HistoryReference, TopicStrategy } from "@/lib/types";
+import type { BriefInput, DraftStage, GeneratedArticle, HistoryReference, TopicStrategy } from "@/lib/types";
 import {
   fetchWechatHistoryReferences,
   parseHistoryUrls,
@@ -560,6 +562,18 @@ function getMaxOutputTokens(articleLength: BriefInput["articleLength"]) {
   return 2000;
 }
 
+function getOutlineMaxOutputTokens(articleLength: BriefInput["articleLength"]) {
+  if (articleLength === "short") {
+    return 850;
+  }
+
+  if (articleLength === "long") {
+    return 1200;
+  }
+
+  return 1000;
+}
+
 function normalizeTopicStrategy(data: PartialTopicStrategy, brief: BriefInput): TopicStrategy {
   const baseDirections =
     data.inferredDirections?.map((item) => item.trim()).filter(Boolean) ||
@@ -704,7 +718,7 @@ async function resolveHistoryReferences(brief: BriefInput): Promise<{
   };
 }
 
-function normalizeArticle(data: PartialArticle, brief: BriefInput): GeneratedArticle {
+function normalizeArticle(data: PartialArticle, brief: BriefInput, draftStage: DraftStage = "full"): GeneratedArticle {
   const fallback = createMockArticle(brief);
   const palette = buildPalette(brief.stylePreset);
   const expectedSectionCount = getExpectedSectionCount(brief.articleLength);
@@ -732,6 +746,7 @@ function normalizeArticle(data: PartialArticle, brief: BriefInput): GeneratedArt
 
   return {
     mode: "live",
+    draftStage,
     title: data.title?.trim() || fallback.title,
     subtitle: data.subtitle?.trim() || fallback.subtitle,
     dek: data.dek?.trim() || fallback.dek,
@@ -837,6 +852,8 @@ async function requestStructuredArticle(
   brief: BriefInput,
   systemPrompt: string,
   userPrompt: string,
+  draftStage: DraftStage = "full",
+  maxOutputTokensOverride?: number,
 ) {
   const preferredStyle =
     config.providerId === "doubao" ? "chat" : config.textApiStyle;
@@ -857,6 +874,7 @@ async function requestStructuredArticle(
         style,
         systemPrompt,
         userPrompt,
+        maxOutputTokensOverride,
       );
 
       if (!rawText) {
@@ -864,7 +882,7 @@ async function requestStructuredArticle(
       }
 
       const parsed = parseModelJson<PartialArticle>(rawText);
-      const article = normalizeArticle(parsed, brief);
+      const article = normalizeArticle(parsed, brief, draftStage);
 
       return {
         article,
@@ -905,8 +923,13 @@ async function requestLeanTopicStrategy(
       }
 
       const parsed = parseModelJson<PartialTopicStrategy>(rawText);
+      const strategy = normalizeTopicStrategy(parsed, brief);
       return {
-        strategy: normalizeTopicStrategy(parsed, brief),
+        strategy: {
+          ...strategy,
+          inferredDirections: strategy.inferredDirections.slice(0, 3),
+          suggestedTopics: strategy.suggestedTopics.slice(0, 3),
+        },
         model: `${config.textModel} (${style})`,
       };
     } catch (error) {
@@ -963,7 +986,7 @@ async function requestStructuredTopicStrategy(
   throw lastError instanceof Error ? lastError : new Error("生成选题策略失败。");
 }
 
-export async function generateArticle(brief: BriefInput) {
+export async function generateArticleOutline(brief: BriefInput) {
   const config = getRuntimeConfig();
   const client = getClient(config);
 
@@ -975,8 +998,10 @@ export async function generateArticle(brief: BriefInput) {
     client,
     config,
     brief,
-    ARTICLE_SYSTEM_PROMPT,
-    buildArticlePrompt(brief),
+    ARTICLE_OUTLINE_SYSTEM_PROMPT,
+    buildArticleOutlinePrompt(brief),
+    "outline",
+    getOutlineMaxOutputTokens(brief.articleLength),
   );
 
   return {
@@ -984,6 +1009,33 @@ export async function generateArticle(brief: BriefInput) {
     source: "ai" as const,
     provider: config.providerLabel,
     model: getPublicModelLabel(result.model, config.providerLabel),
+    stage: "outline" as const,
+  };
+}
+
+export async function expandArticleDraft(brief: BriefInput, article: GeneratedArticle) {
+  const config = getRuntimeConfig();
+  const client = getClient(config);
+
+  if (!client) {
+    throw new Error("当前环境没有可用的 AI 配置，请先检查 API Key 和模型。");
+  }
+
+  const result = await requestStructuredArticle(
+    client,
+    config,
+    brief,
+    ARTICLE_EXPANSION_SYSTEM_PROMPT,
+    buildDraftExpansionPrompt(brief, article),
+    "full",
+  );
+
+  return {
+    article: result.article,
+    source: "ai" as const,
+    provider: config.providerLabel,
+    model: getPublicModelLabel(result.model, config.providerLabel),
+    stage: "full" as const,
   };
 }
 
@@ -1040,18 +1092,7 @@ export async function refineArticle(
   const client = getClient(config);
 
   if (!client) {
-    return {
-      article: {
-        ...article,
-        layoutNotes: [
-          ...article.layoutNotes,
-          "当前未配置真实模型，AI 优化请求已回退为本地草稿编辑。",
-        ],
-      },
-      source: "mock" as const,
-      provider: "Mock",
-      model: "本地演示",
-    };
+    throw new Error("当前环境没有可用的 AI 配置，请先检查 API Key 和模型。");
   }
 
   const result = await requestStructuredArticle(
@@ -1067,6 +1108,7 @@ export async function refineArticle(
     source: "ai" as const,
     provider: config.providerLabel,
     model: getPublicModelLabel(result.model, config.providerLabel),
+    stage: result.article.draftStage,
   };
 }
 
