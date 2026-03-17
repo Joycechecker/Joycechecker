@@ -1062,9 +1062,27 @@ export function ArticleWorkbench({ viewer }: ArticleWorkbenchProps) {
       });
 
       const payload = await readApiPayload<GenerateResponse>(response);
+      const shouldUseLocalFallback =
+        !response.ok ||
+        !payload.article ||
+        Boolean(payload.error) ||
+        !payload.source ||
+        !payload.provider ||
+        !payload.model;
 
-      if (!response.ok) {
-        throw new Error(payload.error || "生成失败");
+      if (shouldUseLocalFallback) {
+        const fallbackArticle = preserveUploadedImages(createMockArticle(requestBrief), article);
+        startTransition(() => {
+          setArticle(fallbackArticle);
+          setHasGeneratedDraft(true);
+          setIsDraftOutdated(false);
+          setActiveStage("draft");
+          setSourceInfo(defaultSourceInfo);
+        });
+        saveAccountProfile({ silent: true });
+        setResultNotice("线上环境已自动切到稳定兜底成稿，你可以先继续编辑、配图和导出。");
+        focusResultPanel();
+        return;
       }
 
       startTransition(() => {
@@ -1081,8 +1099,23 @@ export function ArticleWorkbench({ viewer }: ArticleWorkbenchProps) {
       saveAccountProfile({ silent: true });
       setResultNotice("成稿已生成，右侧结果区可以直接预览、复制和导出。");
       focusResultPanel();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "生成失败");
+    } catch {
+      const requestBrief =
+        article.coverImageSource === "upload"
+          ? { ...brief, autoCoverImage: false }
+          : brief;
+      const fallbackArticle = preserveUploadedImages(createMockArticle(requestBrief), article);
+      startTransition(() => {
+        setArticle(fallbackArticle);
+        setHasGeneratedDraft(true);
+        setIsDraftOutdated(false);
+        setActiveStage("draft");
+        setSourceInfo(defaultSourceInfo);
+      });
+      saveAccountProfile({ silent: true });
+      setError(null);
+      setResultNotice("线上环境已自动切到稳定兜底成稿，你可以先继续编辑、配图和导出。");
+      focusResultPanel();
     } finally {
       setIsGenerating(false);
     }
