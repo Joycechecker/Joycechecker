@@ -194,6 +194,89 @@ export function getRuntimeDiagnostics() {
   };
 }
 
+export async function runModelConnectivityCheck() {
+  const config = getRuntimeConfig();
+  const client = getClient(config, 12000);
+
+  if (!client) {
+    return {
+      ok: false,
+      provider: config.providerLabel,
+      model: getPublicModelLabel(config.textModel, config.providerLabel),
+      reason: "未读取到可用的 API Key。",
+    };
+  }
+
+  try {
+    const preferredStyle =
+      config.providerId === "doubao" ? "chat" : config.textApiStyle;
+    const fallbackStyle: TextApiStyle =
+      preferredStyle === "chat" ? "responses" : "chat";
+    const styles =
+      config.providerId === "doubao"
+        ? [preferredStyle, fallbackStyle]
+        : [preferredStyle];
+    let lastError: unknown;
+
+    for (const style of styles) {
+      try {
+        const text = await requestArticleTextByStyle(
+          client,
+          config,
+          buildFreshPingBrief(),
+          style,
+          "你是一个接口连通性自检助手。只回答 ok。",
+          "请只输出 ok",
+        );
+
+        return {
+          ok: text.trim().toLowerCase().includes("ok"),
+          provider: config.providerLabel,
+          model: getPublicModelLabel(`${config.textModel} (${style})`, config.providerLabel),
+          reply: text.trim(),
+        };
+      } catch (error) {
+        lastError = error;
+      }
+    }
+
+    throw lastError instanceof Error ? lastError : new Error("模型连通性检查失败。");
+  } catch (error) {
+    return {
+      ok: false,
+      provider: config.providerLabel,
+      model: getPublicModelLabel(config.textModel, config.providerLabel),
+      reason: getErrorMessage(error),
+    };
+  }
+}
+
+function buildFreshPingBrief(): BriefInput {
+  return {
+    accountMode: "new",
+    accountName: "诊断号",
+    accountPurpose: "接口连通性检查",
+    accountDirection: "诊断",
+    directionUpdate: "",
+    historyArticleUrls: "",
+    historyArticleTitles: "",
+    topic: "诊断",
+    promotedEntityType: "none",
+    brandName: "",
+    audience: "诊断",
+    editorNotes: "",
+    tone: "简洁",
+    objective: "诊断",
+    keyPoints: "诊断",
+    stylePreset: "professional",
+    layoutPreset: "clean",
+    articleLength: "short",
+    includeImages: false,
+    autoCoverImage: false,
+    imageStyle: "",
+  };
+}
+
 function withTimeout<T>(promise: Promise<T>, timeoutMs: number, fallback: () => T | Promise<T>) {
   return Promise.race([
     promise,
