@@ -994,6 +994,18 @@ export async function generateTopicStrategy(brief: BriefInput) {
   };
 }
 
+export async function buildFallbackTopicStrategyResult(brief: BriefInput) {
+  const history = await resolveHistoryReferences(brief);
+
+  return {
+    strategy: normalizeTopicStrategy({}, brief),
+    historyReferences: history.allReferences,
+    source: "mock" as const,
+    provider: "Mock",
+    model: "本地演示",
+  };
+}
+
 export async function refineArticle(
   brief: BriefInput,
   article: GeneratedArticle,
