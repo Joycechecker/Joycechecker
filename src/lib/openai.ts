@@ -927,12 +927,7 @@ export async function generateArticle(brief: BriefInput) {
   const client = getClient(config);
 
   if (!client) {
-    return {
-      article: createMockArticle(brief),
-      source: "mock" as const,
-      provider: "Mock",
-      model: "本地演示",
-    };
+    throw new Error("当前环境没有可用的 AI 配置，请先检查 API Key 和模型。");
   }
 
   const result = await requestStructuredArticle(
@@ -957,33 +952,15 @@ export async function generateTopicStrategy(brief: BriefInput) {
   const client = getClient(config);
 
   if (!client) {
-    return {
-      strategy: normalizeTopicStrategy({}, brief),
-      historyReferences: history.allReferences,
-      source: "mock" as const,
-      provider: "Mock",
-      model: "本地演示",
-    };
+    throw new Error("当前环境没有可用的 AI 配置，请先检查 API Key 和模型。");
   }
 
-  const result = await withTimeout(
-    requestStructuredTopicStrategy(client, config, brief, history.promptReferences),
-    TEXT_REQUEST_TIMEOUT_MS,
-    async () => ({
-      strategy: normalizeTopicStrategy({}, brief),
-      model: "mock-timeout",
-    }),
+  const result = await requestStructuredTopicStrategy(
+    client,
+    config,
+    brief,
+    history.promptReferences,
   );
-
-  if (result.model === "mock-timeout") {
-    return {
-      strategy: result.strategy,
-      historyReferences: history.allReferences,
-      source: "mock" as const,
-      provider: "Mock",
-      model: "本地演示",
-    };
-  }
 
   return {
     strategy: result.strategy,
@@ -991,18 +968,6 @@ export async function generateTopicStrategy(brief: BriefInput) {
     source: "ai" as const,
     provider: config.providerLabel,
     model: getPublicModelLabel(result.model, config.providerLabel),
-  };
-}
-
-export async function buildFallbackTopicStrategyResult(brief: BriefInput) {
-  const history = await resolveHistoryReferences(brief);
-
-  return {
-    strategy: normalizeTopicStrategy({}, brief),
-    historyReferences: history.allReferences,
-    source: "mock" as const,
-    provider: "Mock",
-    model: "本地演示",
   };
 }
 

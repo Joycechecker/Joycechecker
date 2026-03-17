@@ -78,9 +78,9 @@ const defaultBrief: BriefInput = {
 const defaultRefineInstruction =
   "请基于我当前编辑后的内容做优化：提高准确性，减少空话，语气更像高质量公众号，不要推翻重写。";
 const defaultSourceInfo: SourceInfoState = {
-  source: "mock",
-  provider: "Mock",
-  model: "本地演示",
+  source: "idle",
+  provider: "AI",
+  model: "待生成",
 };
 
 const layoutPresetOptions: Array<{
@@ -138,8 +138,12 @@ function buildFreshBrief(overrides: Partial<BriefInput> = {}): BriefInput {
 function sanitizeSourceModelLabel(model: string, provider: string) {
   const trimmed = model.trim();
 
-  if (!trimmed || trimmed.startsWith("mock")) {
-    return "本地演示";
+  if (!trimmed) {
+    return "待生成";
+  }
+
+  if (trimmed.startsWith("mock")) {
+    return "AI 暂不可用";
   }
 
   const styleMatch = trimmed.match(/\((chat|responses)\)$/);
@@ -195,34 +199,6 @@ function textToPoints(text: string) {
     .split(/\n+/)
     .map((item) => item.replace(/^[\-\d.、\s]+/, "").trim())
     .filter(Boolean);
-}
-
-function buildLocalTopicStrategy(brief: BriefInput): TopicStrategy {
-  const directionAnchor =
-    brief.directionUpdate || brief.accountDirection || brief.accountPurpose || "账号定位";
-  const suggestedTopics = [
-    `围绕“${directionAnchor}”先做一篇入门认知稿`,
-    `用一个具体场景解释 ${brief.audience || "目标读者"} 最关心的问题`,
-    `把 ${brief.brandName || "推广对象"} 的价值讲清楚，但不要硬广`,
-    "做一篇系列文章的第一篇，建立栏目感",
-  ];
-
-  return {
-    accountSnapshot:
-      brief.accountMode === "new"
-        ? `这是一个准备围绕“${brief.accountDirection || brief.accountPurpose || "明确定位"}”建立内容心智的新公众号。`
-        : brief.directionUpdate
-          ? `这是一个原本围绕“${brief.accountDirection || brief.accountName || "既有定位"}”运转的老公众号，本次适合用桥接式内容试探“${brief.directionUpdate}”。`
-          : `这是一个适合继续围绕“${brief.accountDirection || brief.accountName || "既有定位"}”做深内容的老公众号。`,
-    inferredDirections:
-      brief.accountMode === "new"
-        ? ["围绕账号定位建立稳定栏目", "先做高相关问题解答与认知教育", "把推广对象和读者场景自然绑定"]
-        : brief.directionUpdate
-          ? ["延续账号既有的核心垂类表达", `用桥接型内容试探“${brief.directionUpdate}”`, "从读者常见问题切入做系列化内容"]
-          : ["延续账号既有的核心垂类表达", "从读者常见问题切入做系列化内容", "把账号已有专业感转化成可执行建议"],
-    suggestedTopics,
-    recommendation: `建议先从“${suggestedTopics[0]}”开始，最容易兼顾账号定位、读者兴趣和后续转化。`,
-  };
 }
 
 async function readApiPayload<T>(response: Response) {
@@ -861,7 +837,11 @@ export function ArticleWorkbench({ viewer }: ArticleWorkbenchProps) {
     workspaceStages.findIndex((item) => item.id === activeStage) + 1,
   );
   const currentModeLabel =
-    sourceInfo.source === "mock" ? "Mock 演示" : `${sourceInfo.provider} AI`;
+    sourceInfo.source === "ai"
+      ? `${sourceInfo.provider} AI`
+      : sourceInfo.source === "mock"
+        ? "AI 暂不可用"
+        : "AI 待生成";
 
   function syncSavedAccounts(nextAccounts: SavedAccountProfile[]) {
     const sortedAccounts = sortAccountsByLastUsed(nextAccounts);
@@ -1062,27 +1042,9 @@ export function ArticleWorkbench({ viewer }: ArticleWorkbenchProps) {
       });
 
       const payload = await readApiPayload<GenerateResponse>(response);
-      const shouldUseLocalFallback =
-        !response.ok ||
-        !payload.article ||
-        Boolean(payload.error) ||
-        !payload.source ||
-        !payload.provider ||
-        !payload.model;
 
-      if (shouldUseLocalFallback) {
-        const fallbackArticle = preserveUploadedImages(createMockArticle(requestBrief), article);
-        startTransition(() => {
-          setArticle(fallbackArticle);
-          setHasGeneratedDraft(true);
-          setIsDraftOutdated(false);
-          setActiveStage("draft");
-          setSourceInfo(defaultSourceInfo);
-        });
-        saveAccountProfile({ silent: true });
-        setResultNotice("线上环境已自动切到稳定兜底成稿，你可以先继续编辑、配图和导出。");
-        focusResultPanel();
-        return;
+      if (!response.ok || !payload.article || payload.source !== "ai") {
+        throw new Error(payload.error || "AI 成稿生成暂时不可用，请稍后重试。");
       }
 
       startTransition(() => {
@@ -1099,23 +1061,9 @@ export function ArticleWorkbench({ viewer }: ArticleWorkbenchProps) {
       saveAccountProfile({ silent: true });
       setResultNotice("成稿已生成，右侧结果区可以直接预览、复制和导出。");
       focusResultPanel();
-    } catch {
-      const requestBrief =
-        article.coverImageSource === "upload"
-          ? { ...brief, autoCoverImage: false }
-          : brief;
-      const fallbackArticle = preserveUploadedImages(createMockArticle(requestBrief), article);
-      startTransition(() => {
-        setArticle(fallbackArticle);
-        setHasGeneratedDraft(true);
-        setIsDraftOutdated(false);
-        setActiveStage("draft");
-        setSourceInfo(defaultSourceInfo);
-      });
-      saveAccountProfile({ silent: true });
-      setError(null);
-      setResultNotice("线上环境已自动切到稳定兜底成稿，你可以先继续编辑、配图和导出。");
-      focusResultPanel();
+    } catch (err) {
+      setSourceInfo(defaultSourceInfo);
+      setError(err instanceof Error ? err.message : "AI 成稿生成暂时不可用，请稍后重试。");
     } finally {
       setIsGenerating(false);
     }
@@ -1136,6 +1084,7 @@ export function ArticleWorkbench({ viewer }: ArticleWorkbenchProps) {
   async function handleTopicStrategy() {
     setIsPlanningTopics(true);
     setError(null);
+    setResultNotice(null);
 
     try {
       const response = await fetch("/api/topic-strategy", {
@@ -1147,22 +1096,9 @@ export function ArticleWorkbench({ viewer }: ArticleWorkbenchProps) {
       });
 
       const payload = await readApiPayload<TopicStrategyResponse>(response);
-      const shouldUseLocalFallback =
-        !response.ok ||
-        !payload.strategy ||
-        Boolean(payload.error) ||
-        !payload.source ||
-        !payload.provider ||
-        !payload.model;
 
-      if (shouldUseLocalFallback) {
-        setTopicStrategy(buildLocalTopicStrategy(brief));
-        setHistoryReferences([]);
-        setActiveStage("strategy");
-        setSourceInfo(defaultSourceInfo);
-        saveAccountProfile({ silent: true });
-        setResultNotice("线上环境已自动切到稳定兜底结果，你可以先继续后面的成稿流程。");
-        return;
+      if (!response.ok || !payload.strategy || payload.source !== "ai") {
+        throw new Error(payload.error || "AI 选题分析暂时不可用，请稍后重试。");
       }
 
       setTopicStrategy(payload.strategy);
@@ -1174,14 +1110,9 @@ export function ArticleWorkbench({ viewer }: ArticleWorkbenchProps) {
         model: sanitizeSourceModelLabel(payload.model, payload.provider),
       });
       saveAccountProfile({ silent: true });
-    } catch {
-      setTopicStrategy(buildLocalTopicStrategy(brief));
-      setHistoryReferences([]);
-      setActiveStage("strategy");
+    } catch (err) {
       setSourceInfo(defaultSourceInfo);
-      saveAccountProfile({ silent: true });
-      setError(null);
-      setResultNotice("线上环境已自动切到稳定兜底结果，你可以先继续后面的成稿流程。");
+      setError(err instanceof Error ? err.message : "AI 选题分析暂时不可用，请稍后重试。");
     } finally {
       setIsPlanningTopics(false);
     }
