@@ -193,6 +193,30 @@ ${historyBlock}
   `.trim();
 }
 
+
+export function buildLeanTopicStrategyPrompt(brief: BriefInput) {
+  return `
+请基于以下公众号 brief，快速输出一份选题策略 JSON。
+
+公众号阶段：${brief.accountMode === "new" ? "新号" : "老号"}
+公众号名称：${brief.accountName || "未填写"}
+公众号主要目标：${brief.accountPurpose || "未填写"}
+公众号内容方向：${brief.accountDirection || "未填写"}
+本次新增规划方向：${brief.directionUpdate || "未填写"}
+推广对象：${brief.brandName || "未填写"}
+目标受众：${brief.audience || "未填写"}
+人工意见：${brief.editorNotes || "未填写"}
+
+要求：
+- 只输出 JSON，不要解释。
+- accountSnapshot 控制在 1 句。
+- inferredDirections 输出 3 条。
+- suggestedTopics 输出 4 条。
+- 选题必须像公众号题目方向，不要像短视频标题。
+- 如果用户写了人工意见，优先服从。
+  `.trim();
+}
+
 export function buildRefinePrompt(
   brief: BriefInput,
   article: GeneratedArticle,

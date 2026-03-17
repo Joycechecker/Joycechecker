@@ -9,6 +9,7 @@ import {
   REFINE_SYSTEM_PROMPT,
   TOPIC_STRATEGY_SYSTEM_PROMPT,
   buildArticlePrompt,
+  buildLeanTopicStrategyPrompt,
   buildRefinePrompt,
   buildTopicStrategyPrompt,
 } from "@/lib/prompts";
@@ -788,8 +789,9 @@ async function requestArticleTextByStyle(
   style: TextApiStyle,
   systemPrompt: string,
   userPrompt: string,
+  maxOutputTokensOverride?: number,
 ) {
-  const maxOutputTokens = getMaxOutputTokens(brief.articleLength);
+  const maxOutputTokens = maxOutputTokensOverride ?? getMaxOutputTokens(brief.articleLength);
 
   if (style === "chat") {
     const response = await client.chat.completions.create({
@@ -874,6 +876,45 @@ async function requestStructuredArticle(
   }
 
   throw lastError instanceof Error ? lastError : new Error("生成文章失败。");
+}
+
+async function requestLeanTopicStrategy(
+  client: OpenAI,
+  config: RuntimeConfig,
+  brief: BriefInput,
+) {
+  const preferredStyle = config.providerId === "doubao" ? "chat" : config.textApiStyle;
+  const fallbackStyle: TextApiStyle = preferredStyle === "chat" ? "responses" : "chat";
+  const styles = config.providerId === "doubao" ? [preferredStyle, fallbackStyle] : [preferredStyle];
+  let lastError: unknown;
+
+  for (const style of styles) {
+    try {
+      const rawText = await requestArticleTextByStyle(
+        client,
+        config,
+        { ...brief, articleLength: "short" },
+        style,
+        TOPIC_STRATEGY_SYSTEM_PROMPT,
+        buildLeanTopicStrategyPrompt(brief),
+        700,
+      );
+
+      if (!rawText) {
+        throw new Error("模型没有返回选题策略。");
+      }
+
+      const parsed = parseModelJson<PartialTopicStrategy>(rawText);
+      return {
+        strategy: normalizeTopicStrategy(parsed, brief),
+        model: `${config.textModel} (${style})`,
+      };
+    } catch (error) {
+      lastError = error;
+    }
+  }
+
+  throw lastError instanceof Error ? lastError : new Error("生成选题策略失败。");
 }
 
 async function requestStructuredTopicStrategy(
@@ -965,6 +1006,25 @@ export async function generateTopicStrategy(brief: BriefInput) {
   return {
     strategy: result.strategy,
     historyReferences: history.allReferences,
+    source: "ai" as const,
+    provider: config.providerLabel,
+    model: getPublicModelLabel(result.model, config.providerLabel),
+  };
+}
+
+export async function generateLeanTopicStrategy(brief: BriefInput) {
+  const config = getRuntimeConfig();
+  const client = getClient(config, 12000);
+
+  if (!client) {
+    throw new Error("当前环境没有可用的 AI 配置，请先检查 API Key 和模型。");
+  }
+
+  const result = await requestLeanTopicStrategy(client, config, brief);
+
+  return {
+    strategy: result.strategy,
+    historyReferences: [],
     source: "ai" as const,
     provider: config.providerLabel,
     model: getPublicModelLabel(result.model, config.providerLabel),

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { getSessionFromCookieHeader } from "@/lib/auth";
-import { generateTopicStrategy } from "@/lib/openai";
+import { generateLeanTopicStrategy, generateTopicStrategy } from "@/lib/openai";
 import type { BriefInput } from "@/lib/types";
 
 export async function POST(request: Request) {
@@ -13,7 +13,10 @@ export async function POST(request: Request) {
     }
 
     const brief = (await request.json()) as BriefInput;
-    const result = await generateTopicStrategy(brief);
+    const host = request.headers.get("host") || "";
+    const result = host.includes("edgeone.cool")
+      ? await generateLeanTopicStrategy(brief)
+      : await generateTopicStrategy(brief);
 
     return NextResponse.json(result);
   } catch (error) {
