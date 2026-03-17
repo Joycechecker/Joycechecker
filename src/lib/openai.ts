@@ -18,7 +18,6 @@ import {
   parseHistoryUrls,
   parseManualHistoryTitles,
 } from "@/lib/wechat-history";
-import { searchWechatHistoryReferences } from "@/lib/tencent-search";
 
 type TextApiStyle = "responses" | "chat";
 
@@ -169,6 +168,29 @@ function getRuntimeConfig(): RuntimeConfig {
     imageModel,
     textApiStyle:
       (process.env.AI_TEXT_API_STYLE?.trim() as TextApiStyle | undefined) || defaultTextStyle,
+  };
+}
+
+export function getRuntimeDiagnostics() {
+  const config = getRuntimeConfig();
+
+  return {
+    providerId: config.providerId,
+    providerLabel: config.providerLabel,
+    hasApiKey: Boolean(config.apiKey),
+    hasBaseURL: Boolean(config.baseURL),
+    textApiStyle: config.textApiStyle,
+    textModelLabel: getPublicModelLabel(config.textModel, config.providerLabel),
+    hasTextModel: Boolean(config.textModel),
+    imageModelLabel: config.imageModel
+      ? getPublicModelLabel(config.imageModel, config.providerLabel)
+      : "未配置",
+    hasImageModel: Boolean(config.imageModel),
+    hasArkApiKey: Boolean(process.env.ARK_API_KEY?.trim()),
+    hasAiApiKey: Boolean(process.env.AI_API_KEY?.trim()),
+    hasTencentSearchConfig: Boolean(
+      process.env.TENCENTCLOUD_SECRET_ID?.trim() && process.env.TENCENTCLOUD_SECRET_KEY?.trim(),
+    ),
   };
 }
 
@@ -518,11 +540,17 @@ async function resolveHistoryReferences(brief: BriefInput): Promise<{
 }> {
   const manualReferences = parseManualHistoryTitles(brief.historyArticleTitles);
   const urls = parseHistoryUrls(brief.historyArticleUrls);
+  const searchTask =
+    brief.accountMode === "existing" && brief.accountName.trim()
+      ? import("@/lib/tencent-search")
+          .then((module) =>
+            module.searchWechatHistoryReferences(brief.accountName, brief.accountDirection),
+          )
+          .catch(() => [] as HistoryReference[])
+      : Promise.resolve([] as HistoryReference[]);
   const [searchReferences, fetchedReferences] = await withTimeout(
     Promise.all([
-      brief.accountMode === "existing" && brief.accountName.trim()
-        ? searchWechatHistoryReferences(brief.accountName, brief.accountDirection)
-        : Promise.resolve([]),
+      searchTask,
       urls.length > 0 ? fetchWechatHistoryReferences(urls) : Promise.resolve([]),
     ]),
     HISTORY_REFERENCE_TIMEOUT_MS,
