@@ -197,6 +197,34 @@ function textToPoints(text: string) {
     .filter(Boolean);
 }
 
+function buildLocalTopicStrategy(brief: BriefInput): TopicStrategy {
+  const directionAnchor =
+    brief.directionUpdate || brief.accountDirection || brief.accountPurpose || "账号定位";
+  const suggestedTopics = [
+    `围绕“${directionAnchor}”先做一篇入门认知稿`,
+    `用一个具体场景解释 ${brief.audience || "目标读者"} 最关心的问题`,
+    `把 ${brief.brandName || "推广对象"} 的价值讲清楚，但不要硬广`,
+    "做一篇系列文章的第一篇，建立栏目感",
+  ];
+
+  return {
+    accountSnapshot:
+      brief.accountMode === "new"
+        ? `这是一个准备围绕“${brief.accountDirection || brief.accountPurpose || "明确定位"}”建立内容心智的新公众号。`
+        : brief.directionUpdate
+          ? `这是一个原本围绕“${brief.accountDirection || brief.accountName || "既有定位"}”运转的老公众号，本次适合用桥接式内容试探“${brief.directionUpdate}”。`
+          : `这是一个适合继续围绕“${brief.accountDirection || brief.accountName || "既有定位"}”做深内容的老公众号。`,
+    inferredDirections:
+      brief.accountMode === "new"
+        ? ["围绕账号定位建立稳定栏目", "先做高相关问题解答与认知教育", "把推广对象和读者场景自然绑定"]
+        : brief.directionUpdate
+          ? ["延续账号既有的核心垂类表达", `用桥接型内容试探“${brief.directionUpdate}”`, "从读者常见问题切入做系列化内容"]
+          : ["延续账号既有的核心垂类表达", "从读者常见问题切入做系列化内容", "把账号已有专业感转化成可执行建议"],
+    suggestedTopics,
+    recommendation: `建议先从“${suggestedTopics[0]}”开始，最容易兼顾账号定位、读者兴趣和后续转化。`,
+  };
+}
+
 async function readApiPayload<T>(response: Response) {
   const rawText = await response.text();
 
@@ -1086,9 +1114,22 @@ export function ArticleWorkbench({ viewer }: ArticleWorkbenchProps) {
       });
 
       const payload = await readApiPayload<TopicStrategyResponse>(response);
+      const shouldUseLocalFallback =
+        !response.ok ||
+        !payload.strategy ||
+        Boolean(payload.error) ||
+        !payload.source ||
+        !payload.provider ||
+        !payload.model;
 
-      if (!response.ok) {
-        throw new Error(payload.error || "生成选题建议失败");
+      if (shouldUseLocalFallback) {
+        setTopicStrategy(buildLocalTopicStrategy(brief));
+        setHistoryReferences([]);
+        setActiveStage("strategy");
+        setSourceInfo(defaultSourceInfo);
+        saveAccountProfile({ silent: true });
+        setResultNotice("线上环境已自动切到稳定兜底结果，你可以先继续后面的成稿流程。");
+        return;
       }
 
       setTopicStrategy(payload.strategy);
@@ -1100,8 +1141,14 @@ export function ArticleWorkbench({ viewer }: ArticleWorkbenchProps) {
         model: sanitizeSourceModelLabel(payload.model, payload.provider),
       });
       saveAccountProfile({ silent: true });
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "生成选题建议失败");
+    } catch {
+      setTopicStrategy(buildLocalTopicStrategy(brief));
+      setHistoryReferences([]);
+      setActiveStage("strategy");
+      setSourceInfo(defaultSourceInfo);
+      saveAccountProfile({ silent: true });
+      setError(null);
+      setResultNotice("线上环境已自动切到稳定兜底结果，你可以先继续后面的成稿流程。");
     } finally {
       setIsPlanningTopics(false);
     }
