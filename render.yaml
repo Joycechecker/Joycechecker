@@ -1,0 +1,56 @@
+services:
+  - type: web
+    name: wechat-ai-studio
+    env: node
+    plan: starter
+    autoDeploy: true
+    buildCommand: npm ci && npm run build
+    startCommand: npm run start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: 20.11.1
+      - key: NEXT_TELEMETRY_DISABLED
+        value: "1"
+      - key: AI_PROVIDER
+        sync: false
+      - key: AI_PROVIDER_NAME
+        sync: false
+      - key: AI_API_KEY
+        sync: false
+      - key: AI_BASE_URL
+        sync: false
+      - key: AI_TEXT_API_STYLE
+        sync: false
+      - key: AI_TEXT_MODEL
+        sync: false
+      - key: AI_IMAGE_MODEL
+        sync: false
+      - key: AI_IMAGE_PROVIDER
+        sync: false
+      - key: AI_IMAGE_API_KEY
+        sync: false
+      - key: AI_IMAGE_BASE_URL
+        sync: false
+      - key: TENCENTCLOUD_SECRET_ID
+        sync: false
+      - key: TENCENTCLOUD_SECRET_KEY
+        sync: false
+      - key: TENCENTCLOUD_REGION
+        sync: false
+      - key: AI_TEXT_REQUEST_TIMEOUT_MS
+        value: "30000"
+      - key: AI_IMAGE_REQUEST_TIMEOUT_MS
+        value: "25000"
+      - key: HISTORY_REFERENCE_TIMEOUT_MS
+        value: "4500"
+      - key: AUTH_SECRET
+        sync: false
+      - key: AUTH_LOGIN_EMAIL
+        sync: false
+      - key: AUTH_LOGIN_PASSWORD
+        sync: false
+      - key: AUTH_LOGIN_NAME
+        sync: false
+      - key: AUTH_USERS_JSON
+        sync: false

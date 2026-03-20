@@ -33,9 +33,9 @@ AUTH_USERS_JSON=[{"email":"owner@example.com","password":"StrongPassword123!","n
 
 配置完成后重启服务，访问 [http://localhost:3000/login](http://localhost:3000/login) 登录。
 
-## GitHub + EdgeOne 部署
+## GitHub + Render 部署
 
-推荐把这个项目部署到 EdgeOne Pages，原因是它对 Next.js App Router、SSR、Route Handlers 和 Middleware 支持更完整，同时对中国大陆同事访问也更友好。
+如果你准备继续按 Render 作为服务器来推进，这个项目最适合直接部署成一个 Next.js Web Service：前端页面、登录保护和 AI 生成接口都放在同一个服务里，不需要再拆前后端。
 
 ### 1. 上传到 GitHub 之前
 
@@ -60,18 +60,24 @@ git remote add origin 你的 GitHub 仓库地址
 git push -u origin main
 ```
 
-### 3. 在 EdgeOne Pages 导入仓库
+### 3. 在 Render 创建 Web Service
 
-- 打开 [EdgeOne Pages](https://pages.edgeone.ai/)
-- 选择导入 Git 仓库
-- 连接 GitHub
-- 选择这个项目仓库
+- 打开 [Render](https://render.com/)
+- 选择 `New +` → `Web Service`
+- 连接 GitHub 并选择这个项目仓库
+- 如果启用了 Blueprint，也可以直接识别仓库里的 [`render.yaml`](/Volumes/T9/AI大本营/微信通信/render.yaml)
 
-通常不需要额外改构建命令，保持：
+手动创建时，构建配置保持：
 
 ```bash
-Build Command: npm run build
-Output / Framework: Next.js
+Build Command: npm ci && npm run build
+Start Command: npm run start
+```
+
+健康检查路径填：
+
+```bash
+/api/health
 ```
 
 ### 4. 在线上配置环境变量
@@ -106,14 +112,21 @@ AUTH_SECRET=一个足够长的随机字符串
 AUTH_USERS_JSON=[{"email":"a@company.com","password":"StrongPass1!","name":"A"},{"email":"b@company.com","password":"StrongPass2!","name":"B"}]
 ```
 
+如果你直接使用仓库里的 [`render.yaml`](/Volumes/T9/AI大本营/微信通信/render.yaml)，这些 key 也会作为需要补齐的环境变量模板一起带上去。
+
 ### 5. 部署后检查
 
 上线后先验证这几项：
 
+- 打开 `/api/health` 返回 `ok: true`
 - 打开 `/login` 能正常登录
 - 未登录访问 `/studio` 会跳回 `/login`
 - 未登录直接访问 AI API 会返回 `401`
 - 登录后能正常生成选题、正文和图片
+
+## EdgeOne 仍可用
+
+如果你后面又想切回 EdgeOne，这个项目也还能继续部署；只是当前这轮整理已经把 Render 作为默认公网服务路径补齐了。
 
 ## AI 接入
 
